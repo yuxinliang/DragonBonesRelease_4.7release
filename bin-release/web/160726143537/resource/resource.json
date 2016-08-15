@@ -1,0 +1,25 @@
+{
+"resources":
+	[
+		{
+		  "name":"texture_png",
+		  "type":"image",
+		  "url":"texture.png"
+		},
+		{
+		  "name":"skeleton_json",
+		  "type":"json",
+		  "url":"skeleton.json"
+		},
+		{
+		  "name":"texture_json",
+		  "type":"json",
+		  "url":"texture.json"
+		}
+	],
+
+"groups":
+	[
+	  {"name":"TestArmature","keys":"texture_png,skeleton_json,texture_json"}
+	]
+}
