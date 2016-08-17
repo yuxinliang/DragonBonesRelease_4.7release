@@ -74,10 +74,16 @@ class Main extends egret.DisplayObjectContainer {
                 this.isCtrlDown = true;
             }
             if (evt.keyCode == 49) {
-                this["armatureDisplay"].x = this["armature"].getBones()[0].global.x;
-                this["armatureDisplay"].y = this["armature"].getBones()[0].global.y;
-                this["armatureDisplay"].scaleX = 1;
-                this["armatureDisplay"].scaleY = 1;
+                this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]+50//-this.armature.getBones()[0].global.x;
+                this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]+50//+this.armature.getBones()[0].global.y;
+                var ssss = this.armature.armatureData.aabb.width / 1100;
+                ssss = this.armature.armatureData.aabb.height / 800 < ssss ? ssss : this.armature.armatureData.aabb.height / 800;
+                this.container.scaleX = 1 / ssss;
+                this.container.scaleY = 1 / ssss;
+                //this["armatureDisplay"].x = this["armature"].getBones()[0].global.x;
+                //this["armatureDisplay"].y = this["armature"].getBones()[0].global.y;
+                //this["armatureDisplay"].scaleX = 1;
+                //this["armatureDisplay"].scaleY = 1;
             }
         });
         document.addEventListener("keyup", (evt: KeyboardEvent) => {
@@ -98,8 +104,8 @@ class Main extends egret.DisplayObjectContainer {
         this.container = new egret.DisplayObjectContainer();
 
         egret.MainContext.instance.stage.addChild(this.container);
-        this.container.x = 600;
-        this.container.y = 500;
+        //this.container.x = 600;
+        //this.container.y = 500;
         //读取一个骨骼数据,并创建实例显示到舞台
         var skeletonData = RES.getRes("skeleton_json");
         var textureData = RES.getRes("texture_json");
@@ -130,8 +136,16 @@ class Main extends egret.DisplayObjectContainer {
         this.armatureDisplay = this.armature.display;
         dragonBones.WorldClock.clock.add(this.armature);
         this.container.addChild(this.armatureDisplay);
-        this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
-        this.armatureDisplay.y = this.armature.getBones()[0].global.y;
+        //this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
+        //this.armatureDisplay.y = this.armature.getBones()[0].global.y;
+        //this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]-this.armature.getBones()[0].global.x;
+        // this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]-this.armature.getBones()[0].global.y;
+        this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]+50//-this.armature.getBones()[0].global.x;
+        this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]+50//+this.armature.getBones()[0].global.y;
+        var ssss = this.armature.armatureData.aabb.width / 1100;
+        ssss = this.armature.armatureData.aabb.height / 800 < ssss ? ssss : this.armature.armatureData.aabb.height / 800;
+        this.container.scaleX = 1 / ssss;
+        this.container.scaleY = 1 / ssss;
         //var aniCachManager:dragonBones.AnimationCacheManager = this.armature.enableAnimationCache(60, null, false);
         //console.log(aniCachManager)
         //aniCachManager.resetCacheGeneratorArmature();
@@ -168,7 +182,7 @@ class Main extends egret.DisplayObjectContainer {
             this.tempY = evt.stageY;
             this.armeX = this.armatureDisplay.x;
             this.armeY = this.armatureDisplay.y;
-            this.armeSX = this.armatureDisplay.scaleX;
+            this.armeSX = this.container.scaleX;
             this.nowX = evt.stageX;
             this.nowY = evt.stageY;
         } else {
@@ -200,25 +214,25 @@ class Main extends egret.DisplayObjectContainer {
         if (this.isMultiFinger) {
             var nowDistance = Math.sqrt((this.now2X - this.nowX) * (this.now2X - this.nowX) + (this.now2Y - this.nowY) * (this.now2Y - this.nowY));
             var temDistance = Math.sqrt((this.temp2X - this.tempX) * (this.temp2X - this.tempX) + (this.temp2Y - this.tempY) * (this.temp2Y - this.tempY));
-            if (this.armatureDisplay.scaleX > 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) > 0.3 && this.armatureDisplay.scaleX < 3 && this.armeSX + ((nowDistance / temDistance) - 1) < 3) {
-                this.armatureDisplay.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
-                this.armatureDisplay.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
+            if (this.container.scaleX > 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) > 0.3 && this.container.scaleX < 3 && this.armeSX + ((nowDistance / temDistance) - 1) < 3) {
+                this.container.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
+                this.container.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
             }
         } else {
             var value = evt.stageY - this.tempY;
             if (!this.isCtrlDown) {
-                this.armatureDisplay.x = this.armeX + (evt.stageX - this.tempX);
-                this.armatureDisplay.y = this.armeY + (evt.stageY - this.tempY);
+                this.armatureDisplay.x = this.armeX + ((evt.stageX - this.tempX)/this.container.scaleX);
+                this.armatureDisplay.y = this.armeY + ((evt.stageY - this.tempY)/this.container.scaleX);
             } else {
                 if (this.tempY < evt.stageY) {
-                    if (this.armatureDisplay.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
-                        this.armatureDisplay.scaleX = this.armeSX - (value / 200);
-                        this.armatureDisplay.scaleY = this.armeSX - (value / 200);
+                    if (this.container.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
+                        this.container.scaleX = this.armeSX - (value / 200);
+                        this.container.scaleY = this.armeSX - (value / 200);
                     }
                 } else {
-                    if (this.armatureDisplay.scaleX < 3 && this.armeSX - (3 * value / 200) < 3) {
-                        this.armatureDisplay.scaleX = this.armeSX - (3 * value / 200);
-                        this.armatureDisplay.scaleY = this.armeSX - (3 * value / 200);
+                    if (this.container.scaleX < 3 && this.armeSX - (3 * value / 200) < 3) {
+                        this.container.scaleX = this.armeSX - (3 * value / 200);
+                        this.container.scaleY = this.armeSX - (3 * value / 200);
                     }
                 }
             }

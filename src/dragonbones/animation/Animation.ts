@@ -72,7 +72,7 @@ namespace dragonBones {
          * @private
          */
         public static toString(): string {
-            return "[Class dragonBones.Animation]";
+            return "[class dragonBones.Animation]";
         }
 
         /**
@@ -128,39 +128,35 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
+            this.timeScale = 1;
 
-            self.timeScale = 1;
+            this._animationStateDirty = false;
+            this._timelineStateDirty = false;
+            this._armature = null;
 
-            self._animationStateDirty = false;
-            self._timelineStateDirty = false;
-            self._armature = null;
+            this._isPlaying = false;
+            this._time = 0;
+            this._lastAnimationState = null;
 
-            self._isPlaying = false;
-            self._time = 0;
-            self._lastAnimationState = null;
-
-            for (let i in self._animations) {
-                delete self._animations[i];
+            for (let i in this._animations) {
+                delete this._animations[i];
             }
 
-            if (self._animationNames.length) {
-                self._animationNames.length = 0;
+            if (this._animationNames.length) {
+                this._animationNames.length = 0;
             }
 
-            for (let i = 0, l = self._animationStates.length; i < l; ++i) {
-                self._animationStates[i].returnToPool();
+            for (let i = 0, l = this._animationStates.length; i < l; ++i) {
+                this._animationStates[i].returnToPool();
             }
 
-            self._animationStates.length = 0;
+            this._animationStates.length = 0;
         }
         /**
          * @private
          */
         protected _fadeOut(fadeOutTime: number, layer: number, group: string, fadeOutMode: AnimationFadeOutMode, pauseFadeOut: boolean): void {
-            const self = this;
-
-            let i = 0, l = self._animationStates.length;
+            let i = 0, l = this._animationStates.length;
             let animationState: AnimationState = null;
 
             switch (fadeOutMode) {
@@ -169,7 +165,7 @@ namespace dragonBones {
 
                 case AnimationFadeOutMode.SameLayer:
                     for (; i < l; ++i) {
-                        animationState = self._animationStates[i];
+                        animationState = this._animationStates[i];
                         if (animationState.layer == layer) {
                             animationState.fadeOut(fadeOutTime, pauseFadeOut);
                         }
@@ -178,7 +174,7 @@ namespace dragonBones {
 
                 case AnimationFadeOutMode.SameGroup:
                     for (; i < l; ++i) {
-                        animationState = self._animationStates[i];
+                        animationState = this._animationStates[i];
                         if (animationState.group == group) {
                             animationState.fadeOut(fadeOutTime, pauseFadeOut);
                         }
@@ -187,14 +183,14 @@ namespace dragonBones {
 
                 case AnimationFadeOutMode.All:
                     for (; i < l; ++i) {
-                        animationState = self._animationStates[i];
+                        animationState = this._animationStates[i];
                         animationState.fadeOut(fadeOutTime, pauseFadeOut);
                     }
                     break;
 
                 case AnimationFadeOutMode.SameLayerAndGroup:
                     for (; i < l; ++i) {
-                        animationState = self._animationStates[i];
+                        animationState = this._animationStates[i];
                         if (animationState.layer == layer && animationState.group == group) {
                             animationState.fadeOut(fadeOutTime, pauseFadeOut);
                         }
@@ -206,10 +202,8 @@ namespace dragonBones {
          * @private
          */
         public _updateFFDTimelineStates(): void {
-            const self = this;
-
-            for (let i = 0, l = self._animationStates.length; i < l; ++i) {
-                self._animationStates[i]._updateFFDTimelineStates();
+            for (let i = 0, l = this._animationStates.length; i < l; ++i) {
+                this._animationStates[i]._updateFFDTimelineStates();
             }
         }
         /**
@@ -245,13 +239,14 @@ namespace dragonBones {
                 let prevLayer = self._animationStates[0]._layer;
                 let weightLeft = 1;
                 let layerTotalWeight = 0;
-                let layerIndex = 1;
+                let animationIndex = 1; // If has multiply animation state, first index is 1.
 
                 for (let i = 0, r = 0; i < animationStateCount; ++i) {
                     const animationState = self._animationStates[i];
                     if (animationState._isFadeOutComplete) {
                         r++;
                         animationState.returnToPool();
+                        self._animationStateDirty = true;
 
                         if (self._lastAnimationState == animationState) {
                             if (i - r >= 0) {
@@ -281,11 +276,11 @@ namespace dragonBones {
                             animationState._updateTimelineStates();
                         }
 
-                        animationState._advanceTime(passedTime, weightLeft, layerIndex);
+                        animationState._advanceTime(passedTime, weightLeft, animationIndex);
 
                         if (animationState._weightResult != 0) {
                             layerTotalWeight += animationState._weightResult;
-                            layerIndex++;
+                            animationIndex++;
                         }
                     }
 
@@ -303,16 +298,14 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public reset(): void {
-            const self = this;
+            this._isPlaying = false;
+            this._lastAnimationState = null;
 
-            self._isPlaying = false;
-            self._lastAnimationState = null;
-
-            for (let i = 0, l = self._animationStates.length; i < l; ++i) {
-                self._animationStates[i].returnToPool();
+            for (let i = 0, l = this._animationStates.length; i < l; ++i) {
+                this._animationStates[i].returnToPool();
             }
 
-            self._animationStates.length = 0;
+            this._animationStates.length = 0;
         }
         /**
          * @language zh_CN
@@ -341,20 +334,18 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public play(animationName: string = null, playTimes: number = -1): AnimationState {
-            const self = this;
-
             let animationState: AnimationState = null;
             if (animationName) {
-                animationState = self.fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
-            } else if (!self._lastAnimationState) {
-                const defaultAnimation = self._armature.armatureData.defaultAnimation;
+                animationState = this.fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
+            } else if (!this._lastAnimationState) {
+                const defaultAnimation = this._armature.armatureData.defaultAnimation;
                 if (defaultAnimation) {
-                    animationState = self.fadeIn(defaultAnimation.name, 0, playTimes, 0, null, AnimationFadeOutMode.All);
+                    animationState = this.fadeIn(defaultAnimation.name, 0, playTimes, 0, null, AnimationFadeOutMode.All);
                 }
-            } else if (!self._isPlaying) {
-                self._isPlaying = true;
+            } else if (!this._isPlaying) {
+                this._isPlaying = true;
             } else {
-                animationState = self.fadeIn(self._lastAnimationState.name, 0, playTimes, 0, null, AnimationFadeOutMode.All);
+                animationState = this.fadeIn(this._lastAnimationState.name, 0, playTimes, 0, null, AnimationFadeOutMode.All);
             }
 
             return animationState;
@@ -383,55 +374,53 @@ namespace dragonBones {
             additiveBlending: boolean = false, displayControl: boolean = true,
             pauseFadeOut: boolean = true, pauseFadeIn: boolean = true
         ): AnimationState {
-            const self = this;
-
-            const clipData = self._animations[animationName];
-            if (!clipData) {
-                self._time = 0;
-                console.warn("No animation.", " Armature: " + self._armature.name, " Animation: " + animationName);
+            const animationData = this._animations[animationName];
+            if (!animationData) {
+                this._time = 0;
+                console.warn("No animation.", " Armature: " + this._armature.name, " Animation: " + animationName);
                 return null;
             }
 
-            self._isPlaying = true;
+            this._isPlaying = true;
 
             if (fadeInTime != fadeInTime || fadeInTime < 0) {
-                if (self._lastAnimationState) {
-                    fadeInTime = clipData.fadeInTime;
+                if (this._lastAnimationState) {
+                    fadeInTime = animationData.fadeInTime;
                 } else {
                     fadeInTime = 0;
                 }
             }
 
             if (playTimes < 0) {
-                playTimes = clipData.playTimes;
+                playTimes = animationData.playTimes;
             }
 
-            self._fadeOut(fadeInTime, layer, group, fadeOutMode, pauseFadeOut);
+            this._fadeOut(fadeInTime, layer, group, fadeOutMode, pauseFadeOut);
 
-            self._lastAnimationState = BaseObject.borrowObject(AnimationState);
-            self._lastAnimationState._layer = layer;
-            self._lastAnimationState._group = group;
-            self._lastAnimationState.additiveBlending = additiveBlending;
-            self._lastAnimationState.displayControl = displayControl;
-            self._lastAnimationState._fadeIn(
-                self._armature, clipData.animation || clipData, animationName,
-                playTimes, clipData.position, clipData.duration, self._time, 1 / clipData.scale, fadeInTime,
+            this._lastAnimationState = BaseObject.borrowObject(AnimationState);
+            this._lastAnimationState._layer = layer;
+            this._lastAnimationState._group = group;
+            this._lastAnimationState.additiveBlending = additiveBlending;
+            this._lastAnimationState.displayControl = displayControl;
+            this._lastAnimationState._fadeIn(
+                this._armature, animationData.animation || animationData, animationName,
+                playTimes, animationData.position, animationData.duration, this._time, 1 / animationData.scale, fadeInTime,
                 pauseFadeIn
             );
-            self._animationStates.push(self._lastAnimationState);
-            self._animationStateDirty = true;
-            self._time = 0;
+            this._animationStates.push(this._lastAnimationState);
+            this._animationStateDirty = true;
+            this._time = 0;
 
-            if (self._animationStates.length > 1) {
-                self._animationStates.sort(Animation._sortAnimationState);
+            if (this._animationStates.length > 1) {
+                this._animationStates.sort(Animation._sortAnimationState);
             }
 
-            const slots = self._armature.getSlots();
+            const slots = this._armature.getSlots();
             for (let i = 0, l = slots.length; i < l; ++i) {
                 const slot = slots[i];
                 if (slot.inheritAnimation) {
                     const childArmature = slot.childArmature;
-                    if (
+                    if ( 
                         childArmature &&
                         childArmature.animation.hasAnimation(animationName) &&
                         !childArmature.animation.getState(animationName)
@@ -441,9 +430,9 @@ namespace dragonBones {
                 }
             }
 
-            self._armature.advanceTime(0);
+            this._armature.advanceTime(0);
 
-            return self._lastAnimationState;
+            return this._lastAnimationState;
         }
         /**
          * @language zh_CN
@@ -471,9 +460,9 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public gotoAndPlayByFrame(animationName: string, frame: number = 0, playTimes: number = -1): AnimationState {
-            const clipData = this._animations[animationName];
-            if (clipData) {
-                this._time = clipData.duration * frame / clipData.frameCount;
+            const animationData = this._animations[animationName];
+            if (animationData) {
+                this._time = animationData.duration * frame / animationData.frameCount;
             }
 
             return this.fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
@@ -489,9 +478,9 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public gotoAndPlayByProgress(animationName: string, progress: number = 0, playTimes: number = -1): AnimationState {
-            const clipData = this._animations[animationName];
-            if (clipData) {
-                this._time = clipData.duration * Math.max(progress, 0);
+            const animationData = this._animations[animationName];
+            if (animationData) {
+                this._time = animationData.duration * Math.max(progress, 0);
             }
 
             return this.fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
@@ -594,13 +583,13 @@ namespace dragonBones {
         public get isCompleted(): boolean {
             const self = this;
 
-            if (self._lastAnimationState) {
-                if (!self._lastAnimationState.isCompleted) {
+            if (this._lastAnimationState) {
+                if (!this._lastAnimationState.isCompleted) {
                     return false;
                 }
 
-                for (let i = 0, l = self._animationStates.length; i < l; ++i) {
-                    if (!self._animationStates[i].isCompleted) {
+                for (let i = 0, l = this._animationStates.length; i < l; ++i) {
+                    if (!this._animationStates[i].isCompleted) {
                         return false;
                     }
                 }
@@ -647,20 +636,20 @@ namespace dragonBones {
         public set animations(value: Map<AnimationData>) {
             const self = this;
 
-            if (self._animations == value) {
+            if (this._animations == value) {
                 return;
             }
 
-            for (let i in self._animations) {
-                delete self._animations[i];
+            for (let i in this._animations) {
+                delete this._animations[i];
             }
 
-            self._animationNames.length = 0;
+            this._animationNames.length = 0;
 
             if (value) {
                 for (let i in value) {
-                    self._animations[i] = value[i];
-                    self._animationNames.push(i);
+                    this._animations[i] = value[i];
+                    this._animationNames.push(i);
                 }
             }
         }

@@ -26,7 +26,7 @@ namespace dragonBones {
         /**
          * @private
          */
-        protected _objectDataParser: ObjectDataParser = new ObjectDataParser();
+        protected _dataParser: DataParser = null;
         /**
          * @private
          */
@@ -38,7 +38,8 @@ namespace dragonBones {
         /** 
          * @private 
          */
-        public constructor() {
+        public constructor(dataParser: DataParser = null) {
+            this._dataParser = dataParser || ObjectDataParser.getInstance();
         }
         /** 
          * @private 
@@ -174,15 +175,16 @@ namespace dragonBones {
                 }
 
                 const slot = this._generateSlot(dataPackage, slotDisplayDataSet);
+                if (slot) {
+                    slot._displayDataSet = slotDisplayDataSet;
+                    slot._setDisplayIndex(slotData.displayIndex);
+                    slot._setBlendMode(slotData.blendMode);
+                    slot._setColor(slotData.color);
 
-                slot._displayDataSet = slotDisplayDataSet;
-                slot._setDisplayIndex(slotData.displayIndex);
-                slot._setBlendMode(slotData.blendMode);
-                slot._setColor(slotData.color);
+                    slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
 
-                slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
-
-                armature.addSlot(slot, slotData.parent.name);
+                    armature.addSlot(slot, slotData.parent.name);
+                }
             }
         }
         /**
@@ -199,8 +201,8 @@ namespace dragonBones {
                     displayList.length = displayIndex + 1;
                 }
 
-                if (!displayData.textureData) {
-                    displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+                if (!displayData.texture) {
+                    displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
                 }
 
                 if (displayData.type == DisplayType.Armature) {
@@ -213,7 +215,7 @@ namespace dragonBones {
 
                     slot._replacedDisplayDataSet[displayIndex] = displayData;
 
-                    if (displayData.meshData) {
+                    if (displayData.mesh) {
                         displayList[displayIndex] = slot.MeshDisplay;
                     } else {
                         displayList[displayIndex] = slot.rawDisplay;
@@ -249,7 +251,7 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public parseDragonBonesData(rawData: any, dragonBonesName: string = null): DragonBonesData {
-            const dragonBonesData = this._objectDataParser.parseDragonBonesData(rawData);
+            const dragonBonesData = this._dataParser.parseDragonBonesData(rawData, 1);
             this.addDragonBonesData(dragonBonesData, dragonBonesName);
 
             return dragonBonesData;
@@ -270,7 +272,7 @@ namespace dragonBones {
          */
         public parseTextureAtlasData(rawData: any, textureAtlas: Object, name: string = null, scale: number = 0): TextureAtlasData {
             const textureAtlasData = this._generateTextureAtlasData(null, null);
-            this._objectDataParser.parseTextureAtlasData(rawData, textureAtlasData, scale);
+            this._dataParser.parseTextureAtlasData(rawData, textureAtlasData, scale);
 
             this._generateTextureAtlasData(textureAtlasData, textureAtlas);
             this.addTextureAtlasData(textureAtlasData, name);
@@ -418,25 +420,23 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public clear(disposeData: Boolean = true): void {
-            const self = this;
-
-            for (let i in self._dragonBonesDataMap) {
+            for (let i in this._dragonBonesDataMap) {
                 if (disposeData) {
-                    self._dragonBonesDataMap[i].returnToPool();
+                    this._dragonBonesDataMap[i].returnToPool();
                 }
 
-                delete self._dragonBonesDataMap[i];
+                delete this._dragonBonesDataMap[i];
             }
 
-            for (let i in self._textureAtlasDataMap) {
+            for (let i in this._textureAtlasDataMap) {
                 if (disposeData) {
-                    const textureAtlasDataList = self._textureAtlasDataMap[i];
+                    const textureAtlasDataList = this._textureAtlasDataMap[i];
                     for (let i = 0, l = textureAtlasDataList.length; i < l; ++i) {
                         textureAtlasDataList[i].returnToPool();
                     }
                 }
 
-                delete self._textureAtlasDataMap[i];
+                delete this._textureAtlasDataMap[i];
             }
         }
         /**
@@ -457,7 +457,9 @@ namespace dragonBones {
                 this._buildSlots(dataPackage, armature);
 
                 if (armature.armatureData.actions.length > 0) { // Add default action.
-                    armature._action = armature.armatureData.actions[armature.armatureData.actions.length - 1];
+                    for (let i = 0, l = armature.armatureData.actions.length; i < l; ++i) {
+                        armature._bufferAction(armature.armatureData.actions[i]);
+                    }
                 }
 
                 armature.advanceTime(0); // Update armature pose.

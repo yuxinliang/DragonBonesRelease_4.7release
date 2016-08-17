@@ -9,7 +9,7 @@ namespace dragonBones {
          * @private
          */
         public static toString(): string {
-            return "[Class dragonBones.AnimationData]";
+            return "[class dragonBones.AnimationData]";
         }
 
         /**
@@ -86,65 +86,61 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.hasAsynchronyTimeline = false;
-            self.cacheTimeToFrameScale = 0;
-            self.position = 0;
-            self.duration = 0;
-            self.playTimes = 0;
-            self.fadeInTime = 0;
-            self.name = null;
-            self.animation = null;
+            this.hasAsynchronyTimeline = false;
+            this.cacheTimeToFrameScale = 0;
+            this.position = 0;
+            this.duration = 0;
+            this.playTimes = 0;
+            this.fadeInTime = 0;
+            this.name = null;
+            this.animation = null;
 
-            for (let i in self.boneTimelines) {
-                self.boneTimelines[i].returnToPool();
-                delete self.boneTimelines[i];
+            for (let i in this.boneTimelines) {
+                this.boneTimelines[i].returnToPool();
+                delete this.boneTimelines[i];
             }
 
-            for (let i in self.slotTimelines) {
-                self.slotTimelines[i].returnToPool();
-                delete self.slotTimelines[i];
+            for (let i in this.slotTimelines) {
+                this.slotTimelines[i].returnToPool();
+                delete this.slotTimelines[i];
             }
 
-            for (let i in self.ffdTimelines) {
-                for (let j in self.ffdTimelines[i]) {
-                    for (let k in self.ffdTimelines[i][j]) {
-                        self.ffdTimelines[i][j][k].returnToPool();
+            for (let i in this.ffdTimelines) {
+                for (let j in this.ffdTimelines[i]) {
+                    for (let k in this.ffdTimelines[i][j]) {
+                        this.ffdTimelines[i][j][k].returnToPool();
                     }
                 }
 
-                delete self.ffdTimelines[i];
+                delete this.ffdTimelines[i];
             }
 
-            if (self.cachedFrames.length) {
-                self.cachedFrames.length = 0;
+            if (this.cachedFrames.length) {
+                this.cachedFrames.length = 0;
             }
         }
         /**
          * @private
          */
         public cacheFrames(value: number): void {
-            const self = this;
-
-            if (self.animation) {
+            if (this.animation) {
                 return;
             }
 
-            const cacheFrameCount = Math.max(Math.floor(self.frameCount * self.scale * value), 1);
+            const cacheFrameCount = Math.max(Math.floor(this.frameCount * this.scale * value), 1);
 
-            self.cacheTimeToFrameScale = cacheFrameCount / (self.duration + 0.000001); //
-            self.cachedFrames.length = 0;
-            self.cachedFrames.length = cacheFrameCount;
+            this.cacheTimeToFrameScale = cacheFrameCount / (this.duration + 0.000001); //
+            this.cachedFrames.length = 0;
+            this.cachedFrames.length = cacheFrameCount;
 
-            for (let i in self.boneTimelines) {
-                self.boneTimelines[i].cacheFrames(cacheFrameCount);
+            for (let i in this.boneTimelines) {
+                this.boneTimelines[i].cacheFrames(cacheFrameCount);
             }
 
-            for (let i in self.slotTimelines) {
-                self.slotTimelines[i].cacheFrames(cacheFrameCount);
+            for (let i in this.slotTimelines) {
+                this.slotTimelines[i].cacheFrames(cacheFrameCount);
             }
         }
         /**

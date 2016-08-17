@@ -4,7 +4,7 @@ namespace dragonBones {
      */
     export class ActionData extends BaseObject {
         public static toString(): string {
-            return "[Class dragonBones.ActionData]";
+            return "[class dragonBones.ActionData]";
         }
 
         public type: ActionType;
@@ -17,12 +17,10 @@ namespace dragonBones {
         }
 
         protected _onClear(): void {
-            const self = this;
-
-            self.type = ActionType.Play;
-            self.data = null;
-            self.bone = null;
-            self.slot = null;
+            this.type = ActionType.Play;
+            this.data = null;
+            this.bone = null;
+            this.slot = null;
         }
     }
     /**
@@ -30,7 +28,7 @@ namespace dragonBones {
      */
     export class EventData extends BaseObject {
         public static toString(): string {
-            return "[Class dragonBones.EventData]";
+            return "[class dragonBones.EventData]";
         }
 
         public type: EventType;
@@ -44,13 +42,11 @@ namespace dragonBones {
         }
 
         protected _onClear(): void {
-            const self = this;
-
-            self.type = EventType.Frame;
-            self.name = null;
-            self.data = null;
-            self.bone = null;
-            self.slot = null;
+            this.type = EventType.Frame;
+            this.name = null;
+            this.data = null;
+            this.bone = null;
+            this.slot = null;
         }
     }
     /**
@@ -69,12 +65,10 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
-            self.position = 0;
-            self.duration = 0;
-            self.prev = null;
-            self.next = null;
+            this.position = 0;
+            this.duration = 0;
+            this.prev = null;
+            this.next = null;
         }
     }
     /**
@@ -145,7 +139,7 @@ namespace dragonBones {
      */
     export class AnimationFrameData extends FrameData<AnimationFrameData> {
         public static toString(): string {
-            return "[Class dragonBones.AnimationFrameData]";
+            return "[class dragonBones.AnimationFrameData]";
         }
 
         public actions: Array<ActionData> = [];
@@ -158,24 +152,22 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            if (self.actions.length) {
-                for (let i = 0, l = self.actions.length; i < l; ++i) {
-                    self.actions[i].returnToPool();
+            if (this.actions.length) {
+                for (let i = 0, l = this.actions.length; i < l; ++i) {
+                    this.actions[i].returnToPool();
                 }
 
-                self.actions.length = 0;
+                this.actions.length = 0;
             }
 
-            if (self.events.length) {
-                for (let i = 0, l = self.events.length; i < l; ++i) {
-                    self.events[i].returnToPool();
+            if (this.events.length) {
+                for (let i = 0, l = this.events.length; i < l; ++i) {
+                    this.events[i].returnToPool();
                 }
 
-                self.events.length = 0;
+                this.events.length = 0;
             }
         }
     }
@@ -184,7 +176,7 @@ namespace dragonBones {
      */
     export class BoneFrameData extends TweenFrameData<BoneFrameData> {
         public static toString(): string {
-            return "[Class dragonBones.BoneFrameData]";
+            return "[class dragonBones.BoneFrameData]";
         }
 
         public tweenScale: boolean;
@@ -198,13 +190,11 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.tweenScale = false;
-            self.tweenRotate = 0;
-            self.transform.identity();
+            this.tweenScale = false;
+            this.tweenRotate = 0;
+            this.transform.identity();
         }
     }
     /**
@@ -216,7 +206,7 @@ namespace dragonBones {
             return new ColorTransform();
         }
         public static toString(): string {
-            return "[Class dragonBones.SlotFrameData]";
+            return "[class dragonBones.SlotFrameData]";
         }
 
         public displayIndex: number;
@@ -230,13 +220,11 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.displayIndex = 0;
-            self.zOrder = 0;
-            self.color = null;
+            this.displayIndex = 0;
+            this.zOrder = 0;
+            this.color = null;
         }
     }
     /**
@@ -244,7 +232,7 @@ namespace dragonBones {
      */
     export class ExtensionFrameData extends TweenFrameData<ExtensionFrameData> {
         public static toString(): string {
-            return "[Class dragonBones.ExtensionFrameData]";
+            return "[class dragonBones.ExtensionFrameData]";
         }
 
         public type: ExtensionType;
@@ -258,18 +246,16 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.type = ExtensionType.FFD;
+            this.type = ExtensionType.FFD;
 
-            if (self.tweens.length) {
-                self.tweens.length = 0;
+            if (this.tweens.length) {
+                this.tweens.length = 0;
             }
 
-            if (self.keys.length) {
-                self.keys.length = 0;
+            if (this.keys.length) {
+                this.keys.length = 0;
             }
         }
     }

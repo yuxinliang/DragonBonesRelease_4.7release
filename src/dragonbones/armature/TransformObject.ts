@@ -66,18 +66,16 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
+            this.userData = null;
+            this.name = null;
+            this.globalTransformMatrix = this._globalTransformMatrix;
+            this.global.identity();
+            this.origin.identity();
+            this.offset.identity();
 
-            self.userData = null;
-            self.name = null;
-            self.globalTransformMatrix = self._globalTransformMatrix;
-            self.global.identity();
-            self.origin.identity();
-            self.offset.identity();
-
-            self._armature = null;
-            self._parent = null;
-            self._globalTransformMatrix.identity();
+            this._armature = null;
+            this._parent = null;
+            this._globalTransformMatrix.identity();
         }
         /**
          * @private

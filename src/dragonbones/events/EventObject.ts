@@ -109,8 +109,12 @@ namespace dragonBones {
          * @private
          */
         public static toString(): string {
-            return "[Class dragonBones.EventObject]";
+            return "[class dragonBones.EventObject]";
         }
+        /**
+         * @private
+         */
+        public static _soundEventManager: IEventDispatcher = null;
 
         /**
          * @language zh_CN
@@ -155,6 +159,10 @@ namespace dragonBones {
          */
         public animationState: AnimationState;
         /**
+         * @private
+         */
+        public frame:AnimationFrameData;
+        /**
          * @language zh_CN
          * 用户数据。
          * @version DragonBones 4.5
@@ -177,6 +185,7 @@ namespace dragonBones {
             this.bone = null;
             this.slot = null;
             this.animationState = null;
+            this.frame = null;
             this.userData = null;
         }
 

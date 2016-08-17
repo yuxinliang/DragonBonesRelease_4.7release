@@ -104,11 +104,15 @@ namespace dragonBones {
          */
         public static NO_TWEEN: number = 100;
 
-        public static VERSION: string = "4.7.1";
+        public static VERSION: string = "4.7.2";
         /**
          * @private
          */
-        public static DEBUG: boolean = true;
+        public static DEBUG: boolean = false;
+        /**
+         * @private
+         */
+        public static DEBUG_DRAW: boolean = false;
         /**
          * @private
          */

@@ -10,7 +10,7 @@ namespace dragonBones {
          * @private
          */
         public static toString(): string {
-            return "[Class dragonBones.DragonBonesData]";
+            return "[class dragonBones.DragonBonesData]";
         }
 
         /**
@@ -34,6 +34,10 @@ namespace dragonBones {
          */
         public name: string;
         /**
+         * @private
+         */
+        public userData: any;
+        /**
          * @language zh_CN
          * 所有的骨架数据。
          * @see dragonBones.ArmatureData
@@ -52,19 +56,18 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
+            this.autoSearch = false;
+            this.frameRate = 0;
+            this.name = null;
+            this.userData = null;
 
-            self.autoSearch = false;
-            self.frameRate = 0;
-            self.name = null;
-
-            for (let i in self.armatures) {
-                self.armatures[i].returnToPool();
-                delete self.armatures[i];
+            for (let i in this.armatures) {
+                this.armatures[i].returnToPool();
+                delete this.armatures[i];
             }
 
-            if (self._armatureNames.length) {
-                self._armatureNames.length = 0;
+            if (this._armatureNames.length) {
+                this._armatureNames.length = 0;
             }
         }
         /**

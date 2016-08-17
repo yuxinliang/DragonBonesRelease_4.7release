@@ -23,22 +23,20 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
+            this.scale = 1;
+            this.offset = 0;
 
-            self.scale = 1;
-            self.offset = 0;
-
-            if (self.frames.length) {
+            if (this.frames.length) {
                 let prevFrame: T = null;
-                for (let i = 0, l = self.frames.length; i < l; ++i) { // Find key frame data.
-                    const frame: T = self.frames[i];
+                for (let i = 0, l = this.frames.length; i < l; ++i) { // Find key frame data.
+                    const frame: T = this.frames[i];
                     if (prevFrame && frame != prevFrame) {
                         prevFrame.returnToPool();
                     }
                     prevFrame = frame;
                 }
 
-                self.frames.length = 0;
+                this.frames.length = 0;
             }
         }
     }
@@ -53,7 +51,7 @@ namespace dragonBones {
             return cacheMatrix;
         }
         public static toString(): string {
-            return "[Class dragonBones.BoneTimelineData]";
+            return "[class dragonBones.BoneTimelineData]";
         }
 
 
@@ -68,15 +66,13 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.bone = null;
-            self.originTransform.identity();
+            this.bone = null;
+            this.originTransform.identity();
 
-            if (self.cachedFrames.length) {
-                self.cachedFrames.length = 0;
+            if (this.cachedFrames.length) {
+                this.cachedFrames.length = 0;
             }
         }
 
@@ -96,7 +92,7 @@ namespace dragonBones {
             return cacheMatrix;
         }
         public static toString(): string {
-            return "[Class dragonBones.SlotTimelineData]";
+            return "[class dragonBones.SlotTimelineData]";
         }
 
         public slot: SlotData = null;
@@ -109,14 +105,12 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.slot = null;
+            this.slot = null;
 
-            if (self.cachedFrames.length) {
-                self.cachedFrames.length = 0;
+            if (this.cachedFrames.length) {
+                this.cachedFrames.length = 0;
             }
         }
 
@@ -130,7 +124,7 @@ namespace dragonBones {
      */
     export class FFDTimelineData extends TimelineData<ExtensionFrameData> {
         public static toString(): string {
-            return "[Class dragonBones.FFDTimelineData]";
+            return "[class dragonBones.FFDTimelineData]";
         }
 
         public displayIndex: number = 0;
@@ -144,13 +138,11 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
-
             super._onClear();
 
-            self.displayIndex = 0;
-            self.skin = null;
-            self.slot = null;
+            this.displayIndex = 0;
+            this.skin = null;
+            this.slot = null;
         }
     }
 }

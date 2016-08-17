@@ -37,32 +37,29 @@ namespace dragonBones {
          * @inheritDoc
          */
         protected _onClear(): void {
-            const self = this;
+            this._isCompleted = false;
+            this._currentPlayTimes = 0;
+            this._currentTime = 0;
+            this._timeline = null;
 
-            self._isCompleted = false;
-            self._currentPlayTimes = 0;
-            self._currentTime = 0;
-            self._timeline = null;
-
-            self._isReverse = false;
-            self._hasAsynchronyTimeline = false;
-            self._frameRate = 0;
-            self._keyFrameCount = 0;
-            self._frameCount = 0;
-            self._position = 0;
-            self._duration = 0;
-            self._animationDutation = 0;
-            self._timeScale = 1;
-            self._timeOffset = 0;
-            self._currentFrame = null;
-            self._armature = null;
-            self._animationState = null;
+            this._isReverse = false;
+            this._hasAsynchronyTimeline = false;
+            this._frameRate = 0;
+            this._keyFrameCount = 0;
+            this._frameCount = 0;
+            this._position = 0;
+            this._duration = 0;
+            this._animationDutation = 0;
+            this._timeScale = 1;
+            this._timeOffset = 0;
+            this._currentFrame = null;
+            this._armature = null;
+            this._animationState = null;
         }
 
         protected _onFadeIn(): void { }
         protected _onUpdateFrame(isUpdate: boolean): void { }
         protected _onArriveAtFrame(isUpdate: boolean): void { }
-        protected _onCrossFrame(frame: T): void { }
 
         protected _setCurrentTime(value: number): boolean {
             const self = this;
@@ -125,52 +122,48 @@ namespace dragonBones {
         }
 
         public setCurrentTime(value: number): void {
-            const self = this;
+            this._setCurrentTime(value);
 
-            self._setCurrentTime(value);
-
-            switch (self._keyFrameCount) {
+            switch (this._keyFrameCount) {
                 case 0:
                     break;
 
                 case 1:
-                    self._currentFrame = self._timeline.frames[0];
-                    self._onArriveAtFrame(false);
-                    self._onUpdateFrame(false);
+                    this._currentFrame = this._timeline.frames[0];
+                    this._onArriveAtFrame(false);
+                    this._onUpdateFrame(false);
                     break;
 
                 default:
-                    self._currentFrame = self._timeline.frames[Math.floor(self._currentTime * self._frameRate)];
-                    self._onArriveAtFrame(false);
-                    self._onUpdateFrame(false);
+                    this._currentFrame = this._timeline.frames[Math.floor(this._currentTime * this._frameRate)];
+                    this._onArriveAtFrame(false);
+                    this._onUpdateFrame(false);
                     break;
             }
 
-            self._currentFrame = null;
+            this._currentFrame = null;
         }
 
         public fadeIn(armature: Armature, animationState: AnimationState, timelineData: M, time: number): void {
-            const self = this;
+            this._armature = armature;
+            this._animationState = animationState;
+            this._timeline = timelineData;
 
-            self._armature = armature;
-            self._animationState = animationState;
-            self._timeline = timelineData;
+            const isMainTimeline = <any>this == this._animationState._timeline;
 
-            const isMainTimeline = <any>this == self._animationState._timeline;
+            this._hasAsynchronyTimeline = isMainTimeline || this._animationState.animationData.hasAsynchronyTimeline;
+            this._frameRate = this._armature.armatureData.frameRate;
+            this._keyFrameCount = this._timeline.frames.length;
+            this._frameCount = this._animationState.animationData.frameCount;
+            this._position = this._animationState._position;
+            this._duration = this._animationState._duration;
+            this._animationDutation = this._animationState.animationData.duration;
+            this._timeScale = isMainTimeline ? 1 : (1 / this._timeline.scale);
+            this._timeOffset = isMainTimeline ? 0 : this._timeline.offset;
 
-            self._hasAsynchronyTimeline = isMainTimeline || self._animationState.animationData.hasAsynchronyTimeline;
-            self._frameRate = self._armature.armatureData.frameRate;
-            self._keyFrameCount = self._timeline.frames.length;
-            self._frameCount = self._animationState.animationData.frameCount;
-            self._position = self._animationState._position;
-            self._duration = self._animationState._duration;
-            self._animationDutation = self._animationState.animationData.duration;
-            self._timeScale = isMainTimeline ? 1 : (1 / self._timeline.scale);
-            self._timeOffset = isMainTimeline ? 0 : self._timeline.offset;
+            this._onFadeIn();
 
-            self._onFadeIn();
-
-            self.setCurrentTime(time);
+            this.setCurrentTime(time);
         }
 
         public fadeOut(): void { }
@@ -178,42 +171,13 @@ namespace dragonBones {
         public update(time: number): void {
             const self = this;
 
-            const prevTime = self._currentTime;
-
             if (!self._isCompleted && self._setCurrentTime(time) && self._keyFrameCount) {
                 const currentFrameIndex = self._keyFrameCount > 1 ? Math.floor(self._currentTime * self._frameRate) : 0;
                 const currentFrame = self._timeline.frames[currentFrameIndex];
+
                 if (self._currentFrame != currentFrame) {
-                    if (self._keyFrameCount > 1) {
-                        let crossedFrame = self._currentFrame;
-                        self._currentFrame = currentFrame;
-
-                        if (!crossedFrame) {
-                            const prevFrameIndex = Math.floor(prevTime * self._frameRate);
-                            crossedFrame = self._timeline.frames[prevFrameIndex];
-                            if (!self._isReverse && prevTime <= crossedFrame.position) {
-                                crossedFrame = crossedFrame.prev;
-                            }
-                        }
-
-                        if (self._isReverse) {
-                            while (crossedFrame != currentFrame) {
-                                self._onCrossFrame(crossedFrame);
-                                crossedFrame = crossedFrame.prev;
-                            }
-                        } else {
-                            while (crossedFrame != currentFrame) {
-                                crossedFrame = crossedFrame.next;
-                                self._onCrossFrame(crossedFrame);
-                            }
-                        }
-
-                        self._onArriveAtFrame(true);
-                    } else {
-                        self._currentFrame = currentFrame;
-                        self._onCrossFrame(self._currentFrame);
-                        self._onArriveAtFrame(true);
-                    }
+                    self._currentFrame = currentFrame;
+                    self._onArriveAtFrame(true);
                 }
 
                 self._onUpdateFrame(true);
@@ -248,8 +212,15 @@ namespace dragonBones {
         }
 
         public static _getCurveEasingValue(progress: number, sampling: Array<number>): number {
+            if (progress <= 0) {
+                return 0;
+            } else if (progress >= 1) {
+                return 1;
+            }
+
             let x = 0;
             let y = 0;
+
             for (let i = 0, l = sampling.length; i < l; i += 2) {
                 x = sampling[i];
                 y = sampling[i + 1];
@@ -287,12 +258,12 @@ namespace dragonBones {
 
         protected _onArriveAtFrame(isUpdate: boolean): void {
             const self = this;
-            
+
             self._tweenEasing = self._currentFrame.tweenEasing;
             self._curve = self._currentFrame.curve;
 
             if (
-                self._keyFrameCount == 1 ||
+                self._keyFrameCount <= 1 ||
                 (
                     self._currentFrame.next == self._timeline.frames[0] &&
                     (self._tweenEasing != DragonBones.NO_TWEEN || self._curve) &&
@@ -307,8 +278,7 @@ namespace dragonBones {
 
         protected _onUpdateFrame(isUpdate: boolean): void {
             const self = this;
-
-            if (self._tweenEasing != DragonBones.NO_TWEEN && self._currentFrame.duration > 0) {
+            if (self._tweenEasing != DragonBones.NO_TWEEN) {
                 self._tweenProgress = (self._currentTime - self._currentFrame.position + self._position) / self._currentFrame.duration;
                 if (self._tweenEasing != 0) {
                     self._tweenProgress = TweenTimelineState._getEasingValue(self._tweenProgress, self._tweenEasing);

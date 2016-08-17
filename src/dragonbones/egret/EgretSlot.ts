@@ -9,7 +9,7 @@ namespace dragonBones {
          * @private
          */
         public static toString(): string {
-            return "[Class dragonBones.EgretSlot]";
+            return "[class dragonBones.EgretSlot]";
         }
 
         /**
@@ -48,13 +48,11 @@ namespace dragonBones {
          * @private
          */
         protected _onUpdateDisplay(): void {
-            const self = this;
-
-            if (!self._rawDisplay) {
-                self._rawDisplay = new egret.Bitmap();
+            if (!this._rawDisplay) {
+                this._rawDisplay = new egret.Bitmap();
             }
 
-            self._renderDisplay = <egret.DisplayObject>(self._display || self._rawDisplay);
+            this._renderDisplay = <egret.DisplayObject>(this._display || this._rawDisplay);
         }
         /**
          * @private
@@ -88,6 +86,7 @@ namespace dragonBones {
          * @private
          */
         protected _disposeDisplay(value: Object): void {
+            //
         }
         /**
          * @private
@@ -130,48 +129,46 @@ namespace dragonBones {
          * @private
          */
         protected _updateColor(): void {
-            const self = this;
-
             if (
-                self._colorTransform.redMultiplier != 1 ||
-                self._colorTransform.greenMultiplier != 1 ||
-                self._colorTransform.blueMultiplier != 1 ||
-                self._colorTransform.redOffset != 0 ||
-                self._colorTransform.greenOffset != 0 ||
-                self._colorTransform.blueOffset != 0
+                this._colorTransform.redMultiplier != 1 ||
+                this._colorTransform.greenMultiplier != 1 ||
+                this._colorTransform.blueMultiplier != 1 ||
+                this._colorTransform.redOffset != 0 ||
+                this._colorTransform.greenOffset != 0 ||
+                this._colorTransform.blueOffset != 0
             ) {
-                if (!self._colorFilter) {
-                    self._colorFilter = new egret.ColorMatrixFilter();
+                if (!this._colorFilter) {
+                    this._colorFilter = new egret.ColorMatrixFilter();
                 }
 
-                const colorMatrix = self._colorFilter.matrix;
-                colorMatrix[0] = self._colorTransform.redMultiplier;
-                colorMatrix[6] = self._colorTransform.greenMultiplier;
-                colorMatrix[12] = self._colorTransform.blueMultiplier;
-                colorMatrix[18] = self._colorTransform.alphaMultiplier;
-                colorMatrix[4] = self._colorTransform.redOffset;
-                colorMatrix[9] = self._colorTransform.greenOffset;
-                colorMatrix[14] = self._colorTransform.blueOffset;
-                colorMatrix[19] = self._colorTransform.alphaOffset;
-                self._colorFilter.matrix = colorMatrix;
+                const colorMatrix = this._colorFilter.matrix;
+                colorMatrix[0] = this._colorTransform.redMultiplier;
+                colorMatrix[6] = this._colorTransform.greenMultiplier;
+                colorMatrix[12] = this._colorTransform.blueMultiplier;
+                colorMatrix[18] = this._colorTransform.alphaMultiplier;
+                colorMatrix[4] = this._colorTransform.redOffset;
+                colorMatrix[9] = this._colorTransform.greenOffset;
+                colorMatrix[14] = this._colorTransform.blueOffset;
+                colorMatrix[19] = this._colorTransform.alphaOffset;
+                this._colorFilter.matrix = colorMatrix;
 
-                let filters = self._renderDisplay.filters;
+                let filters = this._renderDisplay.filters;
                 if (!filters) {
                     filters = [];
                 }
 
-                if (filters.indexOf(self._colorFilter) < 0) {
-                    filters.push(self._colorFilter);
+                if (filters.indexOf(this._colorFilter) < 0) {
+                    filters.push(this._colorFilter);
                 }
 
-                self._renderDisplay.filters = filters;
+                this._renderDisplay.filters = filters;
             } else {
-                if (self._colorFilter) {
-                    self._colorFilter = null;
-                    self._renderDisplay.filters = null;
+                if (this._colorFilter) {
+                    this._colorFilter = null;
+                    this._renderDisplay.filters = null;
                 }
 
-                self._renderDisplay.$setAlpha(self._colorTransform.alphaMultiplier);
+                this._renderDisplay.$setAlpha(this._colorTransform.alphaMultiplier);
             }
         }
         /**
@@ -182,15 +179,13 @@ namespace dragonBones {
          * @private
          */
         protected _updateFrame(): void {
-            const self = this;
+            const frameDisplay = <egret.Bitmap>this._renderDisplay;
 
-            const frameDisplay = <egret.Bitmap>self._renderDisplay;
-
-            if (self._display && self._displayIndex >= 0) {
-                const rawDisplayData = self._displayIndex < self._displayDataSet.displays.length ? self._displayDataSet.displays[self._displayIndex] : null;
-                const replacedDisplayData = self._displayIndex < self._replacedDisplayDataSet.length ? self._replacedDisplayDataSet[self._displayIndex] : null;
+            if (this._display && this._displayIndex >= 0) {
+                const rawDisplayData = this._displayIndex < this._displayDataSet.displays.length ? this._displayDataSet.displays[this._displayIndex] : null;
+                const replacedDisplayData = this._displayIndex < this._replacedDisplayDataSet.length ? this._replacedDisplayDataSet[this._displayIndex] : null;
                 const currentDisplayData = replacedDisplayData || rawDisplayData;
-                const currentTextureData = <EgretTextureData>currentDisplayData.textureData;
+                const currentTextureData = <EgretTextureData>currentDisplayData.texture;
                 if (currentTextureData) {
                     const textureAtlasTexture = (<EgretTextureAtlasData>currentTextureData.parent).texture;
                     if (!currentTextureData.texture && textureAtlasTexture) { // Create and cache texture.
@@ -199,32 +194,42 @@ namespace dragonBones {
 
                         currentTextureData.texture.$initData(
                             currentTextureData.region.x, currentTextureData.region.y,
-                            currentTextureData.region.width, currentTextureData.region.height,
+                            Math.min(currentTextureData.region.width, textureAtlasTexture.textureWidth - currentTextureData.region.x), Math.min(currentTextureData.region.height, textureAtlasTexture.textureHeight - currentTextureData.region.y),
                             0, 0,
-                            currentTextureData.region.width, currentTextureData.region.height,
+                            Math.min(currentTextureData.region.width, textureAtlasTexture.textureWidth - currentTextureData.region.x), Math.min(currentTextureData.region.height, textureAtlasTexture.textureHeight - currentTextureData.region.y),
                             textureAtlasTexture.textureWidth, textureAtlasTexture.textureHeight
                         );
                     }
 
-                    const texture = (<egret.Texture>self._armature._replacedTexture) || currentTextureData.texture;
-
+                    const texture = (<egret.Texture>this._armature._replacedTexture) || currentTextureData.texture;
                     if (texture) {
-                        if (self._meshData && self._display == self._meshDisplay) { // Mesh.
-                            const meshDisplay = <egret.Mesh>self._meshDisplay;
+                        if (this._meshData && this._display == this._meshDisplay) { // Mesh.
+                            const meshDisplay = <egret.Mesh>this._meshDisplay;
                             const meshNode = <egret.sys.MeshNode>meshDisplay.$renderNode;
 
-                            for (let i = 0, l = self._meshData.vertices.length; i < l; ++i) {
-                                meshNode.uvs[i] = self._meshData.uvs[i];
-                                meshNode.vertices[i] = self._meshData.vertices[i];
+                            meshNode.uvs.length = 0;
+                            meshNode.vertices.length = 0;
+                            meshNode.indices.length = 0;
+
+                            for (let i = 0, l = this._meshData.vertices.length; i < l; ++i) {
+                                meshNode.uvs[i] = this._meshData.uvs[i];
+                                meshNode.vertices[i] = this._meshData.vertices[i];
                             }
 
-                            for (let i = 0, l = self._meshData.vertexIndices.length; i < l; ++i) {
-                                meshNode.indices[i] = self._meshData.vertexIndices[i];
+                            for (let i = 0, l = this._meshData.vertexIndices.length; i < l; ++i) {
+                                meshNode.indices[i] = this._meshData.vertexIndices[i];
                             }
 
                             meshDisplay.$setBitmapData(texture);
                             meshDisplay.$updateVertices();
                             meshDisplay.$invalidateTransform();
+
+                            // Identity transform.
+                            if (this._meshData.skinned) {
+                                const transformationMatrix = meshDisplay.matrix;
+                                transformationMatrix.identity();
+                                meshDisplay.matrix = transformationMatrix;
+                            }
                         } else { // Normal texture.
                             const rect = currentTextureData.frame || currentTextureData.region;
 
@@ -248,9 +253,9 @@ namespace dragonBones {
                                 pivotY += currentTextureData.frame.y;
                             }
 
-                            if (rawDisplayData && replacedDisplayData) {
-                                pivotX += rawDisplayData.transform.x - replacedDisplayData.transform.x;
-                                pivotY += rawDisplayData.transform.y - replacedDisplayData.transform.y;
+                            if (rawDisplayData && rawDisplayData != currentDisplayData) {
+                                pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+                                pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
                             }
 
                             frameDisplay.$setBitmapData(texture);
@@ -258,7 +263,7 @@ namespace dragonBones {
                             frameDisplay.$setAnchorOffsetY(pivotY);
                         }
 
-                        self._updateVisible();
+                        this._updateVisible();
 
                         return;
                     }
@@ -276,31 +281,29 @@ namespace dragonBones {
          * @private
          */
         protected _updateMesh(): void {
-            const self = this;
-
-            const meshDisplay = <egret.Mesh>self._meshDisplay;
+            const meshDisplay = <egret.Mesh>this._meshDisplay;
             const meshNode = <egret.sys.MeshNode>meshDisplay.$renderNode;
-            const hasFFD = self._ffdVertices.length > 0;
+            const hasFFD = this._ffdVertices.length > 0;
 
-            if (self._meshData.skinned) {
-                for (let i = 0, iF = 0, l = self._meshData.vertices.length; i < l; i += 2) {
+            if (this._meshData.skinned) {
+                for (let i = 0, iF = 0, l = this._meshData.vertices.length; i < l; i += 2) {
                     let iH = i / 2;
 
-                    const boneIndices = self._meshData.boneIndices[iH];
-                    const boneVertices = self._meshData.boneVertices[iH];
-                    const weights = self._meshData.weights[iH];
+                    const boneIndices = this._meshData.boneIndices[iH];
+                    const boneVertices = this._meshData.boneVertices[iH];
+                    const weights = this._meshData.weights[iH];
 
                     let xG = 0, yG = 0;
 
                     for (let iB = 0, lB = boneIndices.length; iB < lB; ++iB) {
-                        const bone = self._meshBones[boneIndices[iB]];
+                        const bone = this._meshBones[boneIndices[iB]];
                         const matrix = bone.globalTransformMatrix;
                         const weight = weights[iB];
 
                         let xL = 0, yL = 0;
                         if (hasFFD) {
-                            xL = boneVertices[iB * 2] + self._ffdVertices[iF];
-                            yL = boneVertices[iB * 2 + 1] + self._ffdVertices[iF + 1];
+                            xL = boneVertices[iB * 2] + this._ffdVertices[iF];
+                            yL = boneVertices[iB * 2 + 1] + this._ffdVertices[iF + 1];
                         } else {
                             xL = boneVertices[iB * 2];
                             yL = boneVertices[iB * 2 + 1];
@@ -319,10 +322,10 @@ namespace dragonBones {
                 meshDisplay.$updateVertices();
                 meshDisplay.$invalidateTransform();
             } else if (hasFFD) {
-                const vertices = self._meshData.vertices;
-                for (let i = 0, l = self._meshData.vertices.length; i < l; i += 2) {
-                    const xG = vertices[i] + self._ffdVertices[i];
-                    const yG = vertices[i + 1] + self._ffdVertices[i + 1];
+                const vertices = this._meshData.vertices;
+                for (let i = 0, l = this._meshData.vertices.length; i < l; i += 2) {
+                    const xG = vertices[i] + this._ffdVertices[i];
+                    const yG = vertices[i + 1] + this._ffdVertices[i + 1];
                     meshNode.vertices[i] = xG;
                     meshNode.vertices[i + 1] = yG;
                 }
@@ -334,11 +337,8 @@ namespace dragonBones {
         /**
          * @private
          */
-        protected _updateTransform(): void
-        {
-            const self = this;
-
-            self._renderDisplay.$setMatrix(<egret.Matrix><any>self.globalTransformMatrix, self.transformUpdateEnabled);
+        protected _updateTransform(): void {
+            this._renderDisplay.$setMatrix(<egret.Matrix><any>this.globalTransformMatrix, this.transformUpdateEnabled);
         }
     }
 }

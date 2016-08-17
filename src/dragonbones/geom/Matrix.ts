@@ -18,14 +18,12 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public copyFrom(value: Matrix): void {
-            const self = this;
-
-            self.a = value.a;
-            self.b = value.b;
-            self.c = value.c;
-            self.d = value.d;
-            self.tx = value.tx;
-            self.ty = value.ty;
+            this.a = value.a;
+            this.b = value.b;
+            this.c = value.c;
+            this.d = value.d;
+            this.tx = value.tx;
+            this.ty = value.ty;
         }
         /**
          * @language zh_CN
@@ -33,11 +31,9 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public identity(): void {
-            const self = this;
-
-            self.a = self.d = 1;
-            self.b = self.c = 0;
-            self.tx = self.ty = 0;
+            this.a = this.d = 1;
+            this.b = this.c = 0;
+            this.tx = this.ty = 0;
         }
         /**
          * @language zh_CN
@@ -46,14 +42,12 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public concat(value: Matrix): void {
-            const self = this;
-
-            const aA = self.a;
-            const bA = self.b;
-            const cA = self.c;
-            const dA = self.d;
-            const txA = self.tx;
-            const tyA = self.ty;
+            const aA = this.a;
+            const bA = this.b;
+            const cA = this.c;
+            const dA = this.d;
+            const txA = this.tx;
+            const tyA = this.ty;
             const aB = value.a;
             const bB = value.b;
             const cB = value.c;
@@ -61,28 +55,28 @@ namespace dragonBones {
             const txB = value.tx;
             const tyB = value.ty;
 
-            self.a = aA * aB + bA * cB;
-            self.b = aA * bB + bA * dB;
-            self.c = cA * aB + dA * cB;
-            self.d = cA * bB + dA * dB;
-            self.tx = aB * txA + cB * tyA + txB;
-            self.ty = dB * tyA + bB * txA + tyB;
+            this.a = aA * aB + bA * cB;
+            this.b = aA * bB + bA * dB;
+            this.c = cA * aB + dA * cB;
+            this.d = cA * bB + dA * dB;
+            this.tx = aB * txA + cB * tyA + txB;
+            this.ty = dB * tyA + bB * txA + tyB;
 
             /*
             [
-                self.a,
-                self.b,
-                self.c,
-                self.d,
-                self.tx,
-                self.ty
+                this.a,
+                this.b,
+                this.c,
+                this.d,
+                this.tx,
+                this.ty
             ] = [
-                self.a * value.a + self.b * value.c,
-                self.a * value.b + self.b * value.d,
-                self.c * value.a + self.d * value.c,
-                self.c * value.b + self.d * value.d,
-                value.a * self.tx + value.c * self.tx + value.tx,
-                value.d * self.ty + value.b * self.ty + value.ty
+                this.a * value.a + this.b * value.c,
+                this.a * value.b + this.b * value.d,
+                this.c * value.a + this.d * value.c,
+                this.c * value.b + this.d * value.d,
+                value.a * this.tx + value.c * this.tx + value.tx,
+                value.d * this.ty + value.b * this.ty + value.ty
             ];
             */
         }
@@ -92,22 +86,20 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public invert(): void {
-            const self = this;
-
-            const aA = self.a;
-            const bA = self.b;
-            const cA = self.c;
-            const dA = self.d;
-            const txA = self.tx;
-            const tyA = self.ty;
+            const aA = this.a;
+            const bA = this.b;
+            const cA = this.c;
+            const dA = this.d;
+            const txA = this.tx;
+            const tyA = this.ty;
             const n = aA * dA - bA * cA;
 
-            self.a = dA / n;
-            self.b = -bA / n;
-            self.c = -cA / n;
-            self.d = aA / n;
-            self.tx = (cA * tyA - dA * txA) / n;
-            self.ty = -(aA * tyA - bA * txA) / n;
+            this.a = dA / n;
+            this.b = -bA / n;
+            this.c = -cA / n;
+            this.d = aA / n;
+            this.tx = (cA * tyA - dA * txA) / n;
+            this.ty = -(aA * tyA - bA * txA) / n;
         }
         /**
          * @language zh_CN
@@ -119,14 +111,12 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public transformPoint(x: number, y: number, result: { x: number, y: number }, delta: boolean = false): void {
-            const self = this;
-
-            result.x = self.a * x + self.c * y;
-            result.y = self.b * x + self.d * y;
+            result.x = this.a * x + this.c * y;
+            result.y = this.b * x + this.d * y;
 
             if (!delta) {
-                result.x += self.tx;
-                result.y += self.ty;
+                result.x += this.tx;
+                result.y += this.ty;
             }
         }
     }

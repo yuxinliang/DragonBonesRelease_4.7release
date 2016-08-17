@@ -52,29 +52,32 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public advanceTime(passedTime: number): void {
-            const self = this;
-
             if (passedTime != passedTime) {
                 passedTime = 0;
             }
 
             if (passedTime < 0) {
-                passedTime = new Date().getTime() / DragonBones.SECOND_TO_MILLISECOND - self.time;
+                passedTime = new Date().getTime() / DragonBones.SECOND_TO_MILLISECOND - this.time;
             }
 
-            passedTime *= self.timeScale;
+            passedTime *= this.timeScale;
 
             if (passedTime < 0) {
-                self.time -= passedTime;
+                this.time -= passedTime;
             } else {
-                self.time += passedTime;
+                this.time += passedTime;
             }
 
             if (passedTime) {
-                let i = 0, r = 0, l = self._animatebles.length;
+                let i = 0, r = 0, l = this._animatebles.length;
                 for (; i < l; ++i) {
-                    const animateble = self._animatebles[i];
+                    const animateble = this._animatebles[i];
                     if (animateble) {
+                        if (r > 0) {
+                            this._animatebles[i - r] = animateble;
+                            this._animatebles[i] = null;
+                        }
+
                         animateble.advanceTime(passedTime);
                     } else {
                         r++;
@@ -82,19 +85,17 @@ namespace dragonBones {
                 }
 
                 if (r > 0) {
-                    r = 0;
-                    l = self._animatebles.length;
-
+                    l = this._animatebles.length;
                     for (; i < l; ++i) {
-                        const animateble = self._animatebles[i];
+                        const animateble = this._animatebles[i];
                         if (animateble) {
-                            self._animatebles[i - r] = animateble;
+                            this._animatebles[i - r] = animateble;
                         } else {
                             r++;
                         }
                     }
 
-                    self._animatebles.length -= r;
+                    this._animatebles.length -= r;
                 }
             }
         }

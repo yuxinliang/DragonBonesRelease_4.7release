@@ -33,6 +33,7 @@ namespace dragonBones {
 
         protected static PIVOT: string = "pivot";
         protected static TRANSFORM: string = "transform";
+        protected static AABB: string = "aabb";
         protected static COLOR: string = "color";
         protected static FILTER: string = "filter";
 
@@ -116,7 +117,7 @@ namespace dragonBones {
                 case "armature":
                     return ArmatureType.Armature;
 
-                case "movieClip":
+                case "movieclip":
                     return ArmatureType.MovieClip;
 
                 default:
@@ -222,14 +223,18 @@ namespace dragonBones {
         protected _animation: AnimationData = null;
         protected _timeline: any = null;
 
-        protected _isParentCooriinate: boolean = false;
-        protected _isAutoTween: boolean = false;
-        protected _animationTweenEasing: number = 0;
+        protected _isOldData: boolean = false; // For 2.x ~ 3.x
+        protected _isGlobalTransform: boolean = false; // For 2.x ~ 3.x
+        protected _isAutoTween: boolean = false; // For 2.x ~ 3.x
+        protected _animationTweenEasing: number = 0; // For 2.x ~ 3.x
+        protected _timelinePivot: Point = new Point(); // For 2.x ~ 3.x
+
         protected _armatureScale: number = 1;
         protected _helpPoint: Point = new Point();
-        protected _helpTransform: Transform = new Transform();
+        protected _helpTransformA: Transform = new Transform();
+        protected _helpTransformB: Transform = new Transform();
         protected _helpMatrix: Matrix = new Matrix();
-        protected _rawBones: Array<BoneData> = [];
+        protected _rawBones: Array<BoneData> = []; // For skinned mesh
 
         public constructor() { }
         /**
@@ -249,7 +254,7 @@ namespace dragonBones {
                 const frame = timeline.frames[frameIndex];
                 let tweenProgress = 0;
 
-                if (frame.duration > 0 && frame.tweenEasing != DragonBones.NO_TWEEN) {
+                if (frame.tweenEasing != DragonBones.NO_TWEEN) {
                     tweenProgress = (position - frame.position) / frame.duration;
                     if (frame.tweenEasing != 0) {
                         tweenProgress = TweenTimelineState._getEasingValue(tweenProgress, frame.tweenEasing);
@@ -259,12 +264,14 @@ namespace dragonBones {
                     tweenProgress = TweenTimelineState._getCurveEasingValue(tweenProgress, frame.curve);
                 }
 
-                transform.x = frame.next.transform.x - frame.transform.x;
-                transform.y = frame.next.transform.y - frame.transform.y;
-                transform.skewX = Transform.normalizeRadian(frame.next.transform.skewX - frame.transform.skewX);
-                transform.skewY = Transform.normalizeRadian(frame.next.transform.skewY - frame.transform.skewY);
-                transform.scaleX = frame.next.transform.scaleX - frame.transform.scaleX;
-                transform.scaleY = frame.next.transform.scaleY - frame.transform.scaleY;
+                const nextFrame = frame.next;
+
+                transform.x = nextFrame.transform.x - frame.transform.x;
+                transform.y = nextFrame.transform.y - frame.transform.y;
+                transform.skewX = Transform.normalizeRadian(nextFrame.transform.skewX - frame.transform.skewX);
+                transform.skewY = Transform.normalizeRadian(nextFrame.transform.skewY - frame.transform.skewY);
+                transform.scaleX = nextFrame.transform.scaleX - frame.transform.scaleX;
+                transform.scaleY = nextFrame.transform.scaleY - frame.transform.scaleY;
 
                 transform.x = frame.transform.x + transform.x * tweenProgress;
                 transform.y = frame.transform.y + transform.y * tweenProgress;
@@ -275,6 +282,63 @@ namespace dragonBones {
             }
 
             transform.add(timeline.originTransform);
+        }
+
+        protected _globalToLocal(armature: ArmatureData): void { // Support 2.x ~ 3.x data.
+            const keyFrames: Array<BoneFrameData> = [];
+            const bones = armature.sortedBones.concat().reverse();
+
+            for (let i = 0, l = bones.length; i < l; ++i) {
+                const bone = bones[i];
+                if (bone.parent) {
+                    bone.parent.transform.toMatrix(this._helpMatrix);
+                    this._helpMatrix.invert();
+                    this._helpMatrix.transformPoint(bone.transform.x, bone.transform.y, bone.transform);
+                    bone.transform.rotation -= bone.parent.transform.rotation;
+                }
+
+                for (let i in armature.animations) {
+                    const animation = armature.animations[i];
+                    const timeline = animation.getBoneTimeline(bone.name);
+
+                    if (!timeline) {
+                        continue;
+                    }
+
+                    const parentTimeline = bone.parent ? animation.getBoneTimeline(bone.parent.name) : null;
+                    this._helpTransformB.copyFrom(timeline.originTransform);
+                    keyFrames.length = 0;
+
+                    for (let i = 0, l = timeline.frames.length; i < l; ++i) {
+                        const frame = timeline.frames[i];
+
+                        if (keyFrames.indexOf(frame) >= 0) {
+                            continue;
+                        }
+                        keyFrames.push(frame);
+
+                        if (parentTimeline) {
+                            this._getTimelineFrameMatrix(animation, parentTimeline, frame.position, this._helpTransformA);
+                            frame.transform.add(this._helpTransformB);
+                            this._helpTransformA.toMatrix(this._helpMatrix);
+                            this._helpMatrix.invert();
+                            this._helpMatrix.transformPoint(frame.transform.x, frame.transform.y, frame.transform);
+                            frame.transform.rotation -= this._helpTransformA.rotation;
+                        } else {
+                            frame.transform.add(this._helpTransformB);
+                        }
+
+                        frame.transform.minus(bone.transform);
+
+                        if (i == 0) {
+                            timeline.originTransform.copyFrom(frame.transform);
+                            frame.transform.identity();
+                        } else {
+                            frame.transform.minus(timeline.originTransform);
+                        }
+                    }
+                }
+            }
         }
 
         protected _mergeFrameToAnimationTimeline<T extends FrameData<T>>(frame: T, actions: Array<ActionData>, events: Array<EventData>): void {
@@ -352,73 +416,6 @@ namespace dragonBones {
             nextFrame.prev = prevFrame;
         }
 
-        protected _globalToLocal(armature: ArmatureData): void { // Support 2.x ~ 3.x data.
-            const keyFrames: Array<BoneFrameData> = [];
-            const bones = armature.sortedBones.concat().reverse();
-
-            for (let i = 0, l = bones.length; i < l; ++i) {
-                const bone = bones[i];
-
-                if (bone.parent) {
-                    bone.parent.transform.toMatrix(this._helpMatrix);
-                    this._helpMatrix.invert();
-                    this._helpMatrix.transformPoint(bone.transform.x, bone.transform.y, bone.transform);
-                    bone.transform.rotation -= bone.parent.transform.rotation;
-                }
-
-                for (let i in armature.animations) {
-                    const animation = armature.animations[i];
-                    const timeline = animation.getBoneTimeline(bone.name);
-
-                    if (!timeline) {
-                        continue;
-                    }
-
-                    const parentTimeline = timeline.bone.parent ? animation.getBoneTimeline(timeline.bone.parent.name) : null;
-                    keyFrames.length = 0;
-
-                    for (let i = 0, l = timeline.frames.length; i < l; ++i) {
-                        const frame = timeline.frames[i];
-
-                        if (keyFrames.indexOf(frame) >= 0) {
-                            continue;
-                        }
-                        keyFrames.push(frame);
-
-                        if (parentTimeline) {
-                            this._getTimelineFrameMatrix(animation, parentTimeline, frame.position, this._helpTransform);
-                            frame.transform.add(timeline.originTransform);
-                            this._helpTransform.toMatrix(this._helpMatrix);
-                            this._helpMatrix.invert();
-                            this._helpMatrix.transformPoint(frame.transform.x, frame.transform.y, frame.transform);
-                            frame.transform.rotation -= this._helpTransform.rotation;
-                        } else {
-                            frame.transform.add(timeline.originTransform);
-                        }
-                    }
-
-                    keyFrames.length = 0;
-
-                    for (let i = 0, l = timeline.frames.length; i < l; ++i) {
-                        const frame = timeline.frames[i];
-
-                        if (keyFrames.indexOf(frame) >= 0) {
-                            continue;
-                        }
-                        keyFrames.push(frame);
-
-                        frame.transform.minus(timeline.bone.transform);
-
-                        if (i == 0) {
-                            timeline.originTransform.copyFrom(frame.transform);
-                            frame.transform.identity();
-                        } else {
-                            frame.transform.minus(timeline.originTransform);
-                        }
-                    }
-                }
-            }
-        }
         /**
          * @deprecated
          * @see dragonBones.BaseFactory#parseDragonBonesData()

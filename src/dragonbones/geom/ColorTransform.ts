@@ -12,23 +12,19 @@ namespace dragonBones {
         }
 
         public copyFrom(value: ColorTransform): void {
-            const self = this;
-
-            self.alphaMultiplier = value.alphaMultiplier;
-            self.redMultiplier = value.redMultiplier;
-            self.greenMultiplier = value.greenMultiplier;
-            self.blueMultiplier = value.blueMultiplier;
-            self.alphaOffset = value.alphaOffset;
-            self.redOffset = value.redOffset;
-            self.redOffset = value.redOffset;
-            self.greenOffset = value.blueOffset;
+            this.alphaMultiplier = value.alphaMultiplier;
+            this.redMultiplier = value.redMultiplier;
+            this.greenMultiplier = value.greenMultiplier;
+            this.blueMultiplier = value.blueMultiplier;
+            this.alphaOffset = value.alphaOffset;
+            this.redOffset = value.redOffset;
+            this.redOffset = value.redOffset;
+            this.greenOffset = value.blueOffset;
         }
 
         public identity(): void {
-            const self = this;
-
-            self.alphaMultiplier = self.redMultiplier = self.greenMultiplier = self.blueMultiplier = 1;
-            self.alphaOffset = self.redOffset = self.greenOffset = self.blueOffset = 0;
+            this.alphaMultiplier = this.redMultiplier = this.greenMultiplier = this.blueMultiplier = 1;
+            this.alphaOffset = this.redOffset = this.greenOffset = this.blueOffset = 0;
         }
     }
 }

@@ -90,6 +90,14 @@ namespace dragonBones {
             this._armature = armature;
             this._rawBones.length = 0;
 
+            if (ObjectDataParser.AABB in rawData) {
+                const aabbObject = rawData[ObjectDataParser.AABB];
+                armature.aabb.x = ObjectDataParser._getNumber(aabbObject, ObjectDataParser.X, 0);
+                armature.aabb.y = ObjectDataParser._getNumber(aabbObject, ObjectDataParser.Y, 0);
+                armature.aabb.width = ObjectDataParser._getNumber(aabbObject, ObjectDataParser.WIDTH, 0);
+                armature.aabb.height = ObjectDataParser._getNumber(aabbObject, ObjectDataParser.HEIGHT, 0);
+            }
+
             if (ObjectDataParser.BONE in rawData) {
                 const bones = <Array<any>>rawData[ObjectDataParser.BONE];
                 for (let i = 0, l = bones.length; i < l; ++i) {
@@ -135,7 +143,7 @@ namespace dragonBones {
                 this._parseActionData(rawData, armature.actions, null, null);
             }
 
-            if (this._isParentCooriinate && ObjectDataParser._getBoolean(rawData, ObjectDataParser.IS_GLOBAL, true)) { // Support 2.x ~ 3.x data.
+            if (this._isOldData && this._isGlobalTransform) { // Support 2.x ~ 3.x data.
                 this._globalToLocal(armature);
             }
 
@@ -159,7 +167,7 @@ namespace dragonBones {
                 this._parseTransform(rawData[ObjectDataParser.TRANSFORM], bone.transform);
             }
 
-            if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+            if (this._isOldData) { // Support 2.x ~ 3.x data.
                 bone.inheritRotation = true;
                 bone.inheritScale = false;
             }
@@ -218,7 +226,7 @@ namespace dragonBones {
                 this._parseActionData(rawData, slot.actions, null, null);
             }
 
-            if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+            if (this._isOldData) { // Support 2.x ~ 3.x data.
                 if (ObjectDataParser.COLOR_TRANSFORM in rawData) {
                     slot.color = SlotData.generateColor();
                     this._parseColorTransform(rawData[ObjectDataParser.COLOR_TRANSFORM], slot.color);
@@ -241,7 +249,7 @@ namespace dragonBones {
 
                 const slots = <Array<any>>rawData[ObjectDataParser.SLOT];
                 for (let i = 0, l = slots.length; i < l; ++i) {
-                    if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+                    if (this._isOldData) { // Support 2.x ~ 3.x data.
                         this._armature.addSlot(this._parseSlot(slots[i]));
                     }
 
@@ -281,6 +289,7 @@ namespace dragonBones {
         protected _parseDisplay(rawData: any): DisplayData {
             const display = BaseObject.borrowObject(DisplayData);
             display.name = ObjectDataParser._getString(rawData, ObjectDataParser.NAME, null);
+
             if (ObjectDataParser.TYPE in rawData && typeof rawData[ObjectDataParser.TYPE] == "string") {
                 display.type = ObjectDataParser._getDisplayType(rawData[ObjectDataParser.TYPE]);
             } else {
@@ -292,7 +301,7 @@ namespace dragonBones {
                 const pivotObject = rawData[ObjectDataParser.PIVOT];
                 display.pivot.x = ObjectDataParser._getNumber(pivotObject, ObjectDataParser.X, 0);
                 display.pivot.y = ObjectDataParser._getNumber(pivotObject, ObjectDataParser.Y, 0);
-            } else if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+            } else if (this._isOldData) { // Support 2.x ~ 3.x data.
                 const transformObject = rawData[ObjectDataParser.TRANSFORM];
                 display.isRelativePivot = false;
                 display.pivot.x = ObjectDataParser._getNumber(transformObject, ObjectDataParser.PIVOT_X, 0) * this._armatureScale;
@@ -314,7 +323,7 @@ namespace dragonBones {
                     break;
 
                 case DisplayType.Mesh:
-                    display.meshData = this._parseMesh(rawData);
+                    display.mesh = this._parseMesh(rawData);
                     break;
             }
 
@@ -468,7 +477,7 @@ namespace dragonBones {
                 }
             }
 
-            if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+            if (this._isOldData) { // Support 2.x ~ 3.x data.
                 this._isAutoTween = ObjectDataParser._getBoolean(rawData, ObjectDataParser.AUTO_TWEEN, true);
                 this._animationTweenEasing = ObjectDataParser._getNumber(rawData, ObjectDataParser.TWEEN_EASING, 0) || 0;
                 animation.playTimes = ObjectDataParser._getNumber(rawData, ObjectDataParser.LOOP, 1);
@@ -520,7 +529,7 @@ namespace dragonBones {
                     slotTimeline.frames[0] = slotFrame;
                     animation.addSlotTimeline(slotTimeline);
 
-                    if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+                    if (this._isOldData) { // Support 2.x ~ 3.x data.
                         slotFrame.displayIndex = -1;
                     }
                 }
@@ -548,7 +557,7 @@ namespace dragonBones {
                     originTransform.copyFrom(frame.transform);
                     frame.transform.identity();
 
-                    if (originTransform.scaleX == 0) {
+                    if (originTransform.scaleX == 0) { // Pose scale and origin scale can not be 0. (poseScale = originScale * animationOriginScale * animationScale)
                         originTransform.scaleX = 0.001;
                         //frame.transform.scaleX = 0;
                     }
@@ -566,6 +575,19 @@ namespace dragonBones {
 
             if (timeline.scale != 1 || timeline.offset != 0) {
                 this._animation.hasAsynchronyTimeline = true;
+            }
+
+            if (
+                this._isOldData &&
+                (
+                    (ObjectDataParser.PIVOT_X in rawData) ||
+                    (ObjectDataParser.PIVOT_Y in rawData)
+                )
+            ) { // Support 2.x ~ 3.x data.
+                this._timelinePivot.x = ObjectDataParser._getNumber(rawData, ObjectDataParser.PIVOT_X, 0);
+                this._timelinePivot.y = ObjectDataParser._getNumber(rawData, ObjectDataParser.PIVOT_Y, 0);
+            } else {
+                this._timelinePivot.clear();
             }
 
             return timeline;
@@ -596,9 +618,9 @@ namespace dragonBones {
             const meshName = ObjectDataParser._getString(rawData, ObjectDataParser.NAME, null);
             for (let i = 0, l = timeline.slot.displays.length; i < l; ++i) {
                 const displayData = timeline.slot.displays[i];
-                if (displayData.meshData && displayData.name == meshName) {
+                if (displayData.mesh && displayData.name == meshName) {
                     timeline.displayIndex = i; // rawData[DISPLAY_INDEX];
-                    this._mesh = displayData.meshData; // Find the ffd's mesh.
+                    this._mesh = displayData.mesh; // Find the ffd's mesh.
                     break;
                 }
             }
@@ -644,9 +666,9 @@ namespace dragonBones {
                 const transformObject = rawData[ObjectDataParser.TRANSFORM];
                 this._parseTransform(transformObject, frame.transform);
 
-                if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
-                    this._helpPoint.x = ObjectDataParser._getNumber(transformObject, ObjectDataParser.PIVOT_X, 0);
-                    this._helpPoint.y = ObjectDataParser._getNumber(transformObject, ObjectDataParser.PIVOT_Y, 0);
+                if (this._isOldData) { // Support 2.x ~ 3.x data.
+                    this._helpPoint.x = this._timelinePivot.x + ObjectDataParser._getNumber(transformObject, ObjectDataParser.PIVOT_X, 0);
+                    this._helpPoint.y = this._timelinePivot.y + ObjectDataParser._getNumber(transformObject, ObjectDataParser.PIVOT_Y, 0);
                     frame.transform.toMatrix(this._helpMatrix);
                     this._helpMatrix.transformPoint(this._helpPoint.x, this._helpPoint.y, this._helpPoint, true);
                     frame.transform.x += this._helpPoint.x;
@@ -686,14 +708,17 @@ namespace dragonBones {
 
             this._parseTweenFrame(rawData, frame, frameStart, frameCount);
 
-            if (ObjectDataParser.COLOR in rawData || ObjectDataParser.COLOR_TRANSFORM in rawData) { // Support 2.x ~ 3.x data. (colorTransform key)
+            if (
+                (ObjectDataParser.COLOR in rawData) ||
+                (ObjectDataParser.COLOR_TRANSFORM in rawData)
+            ) { // Support 2.x ~ 3.x data. (colorTransform key)
                 frame.color = SlotFrameData.generateColor();
                 this._parseColorTransform(rawData[ObjectDataParser.COLOR] || rawData[ObjectDataParser.COLOR_TRANSFORM], frame.color);
             } else {
                 frame.color = SlotFrameData.DEFAULT_COLOR;
             }
 
-            if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+            if (this._isOldData) { // Support 2.x ~ 3.x data.
                 if (ObjectDataParser._getBoolean(rawData, ObjectDataParser.HIDE, false)) {
                     frame.displayIndex = -1;
                 }
@@ -756,18 +781,25 @@ namespace dragonBones {
         protected _parseTweenFrame<T extends TweenFrameData<T>>(rawData: any, frame: T, frameStart: number, frameCount: number): void {
             this._parseFrame(rawData, frame, frameStart, frameCount);
 
-            if (ObjectDataParser.TWEEN_EASING in rawData) {
-                frame.tweenEasing = ObjectDataParser._getNumber(rawData, ObjectDataParser.TWEEN_EASING, DragonBones.NO_TWEEN);
-            } else if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
-                frame.tweenEasing = this._isAutoTween ? this._animationTweenEasing : DragonBones.NO_TWEEN;
-            }
+            if (frame.duration > 0) {
+                if (ObjectDataParser.TWEEN_EASING in rawData) {
+                    frame.tweenEasing = ObjectDataParser._getNumber(rawData, ObjectDataParser.TWEEN_EASING, DragonBones.NO_TWEEN);
+                } else if (this._isOldData) { // Support 2.x ~ 3.x data.
+                    frame.tweenEasing = this._isAutoTween ? this._animationTweenEasing : DragonBones.NO_TWEEN;
+                } else {
+                    frame.tweenEasing = DragonBones.NO_TWEEN;
+                }
 
-            if (this._isParentCooriinate && this._animation.scale == 1 && (<TimelineData<T>>this._timeline).scale == 1 && frame.duration * this._armature.frameRate < 2) {
+                if (this._isOldData && this._animation.scale == 1 && (<TimelineData<T>>this._timeline).scale == 1 && frame.duration * this._armature.frameRate < 2) {
+                    frame.tweenEasing = DragonBones.NO_TWEEN;
+                }
+
+                if (ObjectDataParser.CURVE in rawData) {
+                    frame.curve = TweenFrameData.samplingCurve(rawData[ObjectDataParser.CURVE], frameCount);
+                }
+            } else {
                 frame.tweenEasing = DragonBones.NO_TWEEN;
-            }
-
-            if (ObjectDataParser.CURVE in rawData) {
-                frame.curve = TweenFrameData.samplingCurve(rawData[ObjectDataParser.CURVE], frameCount);
+                frame.curve = null;
             }
         }
         /**
@@ -811,7 +843,7 @@ namespace dragonBones {
                                     prevFrame.next = frame;
                                     frame.prev = prevFrame;
 
-                                    if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+                                    if (this._isOldData) { // Support 2.x ~ 3.x data.
                                         if (prevFrame instanceof TweenFrameData && frameObject[ObjectDataParser.DISPLAY_INDEX] == -1) {
                                             (<TweenFrameData<T>><any>prevFrame).tweenEasing = DragonBones.NO_TWEEN;
                                         }
@@ -830,7 +862,7 @@ namespace dragonBones {
                         prevFrame.next = frame;
                         frame.prev = prevFrame;
 
-                        if (this._isParentCooriinate) { // Support 2.x ~ 3.x data.
+                        if (this._isOldData) { // Support 2.x ~ 3.x data.
                             if (prevFrame instanceof TweenFrameData && rawFrames[0][ObjectDataParser.DISPLAY_INDEX] == -1) {
                                 (<TweenFrameData<T>><any>prevFrame).tweenEasing = DragonBones.NO_TWEEN;
                             }
@@ -978,13 +1010,19 @@ namespace dragonBones {
         public parseDragonBonesData(rawData: any, scale: number = 1): DragonBonesData {
             if (rawData) {
                 const version = ObjectDataParser._getString(rawData, ObjectDataParser.VERSION, null);
-                this._isParentCooriinate = version == ObjectDataParser.DATA_VERSION_2_3 || version == ObjectDataParser.DATA_VERSION_3_0;
+                this._isOldData = version == ObjectDataParser.DATA_VERSION_2_3 || version == ObjectDataParser.DATA_VERSION_3_0;
+                if (this._isOldData) {
+                    this._isGlobalTransform = ObjectDataParser._getBoolean(rawData, ObjectDataParser.IS_GLOBAL, true);
+                } else {
+                    this._isGlobalTransform = false;
+                }
+
                 this._armatureScale = scale;
 
                 if (
                     version == ObjectDataParser.DATA_VERSION ||
                     version == ObjectDataParser.DATA_VERSION_4_0 ||
-                    this._isParentCooriinate
+                    this._isOldData
                 ) {
                     const data = BaseObject.borrowObject(DragonBonesData);
                     data.name = ObjectDataParser._getString(rawData, ObjectDataParser.NAME, null);
@@ -1062,7 +1100,7 @@ namespace dragonBones {
         }
 
         /**
-         * @deprecated
+         * @private
          */
         private static _instance: ObjectDataParser = null;
         /**
