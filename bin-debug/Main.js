@@ -86,8 +86,8 @@ var Main = (function (_super) {
             if (evt.keyCode == 49) {
                 _this.armatureDisplay.x = -_this.armature.armatureData.aabb["x"] + 50; //-this.armature.getBones()[0].global.x;
                 _this.armatureDisplay.y = -_this.armature.armatureData.aabb["y"] + 50; //+this.armature.getBones()[0].global.y;
-                var ssss = _this.armature.armatureData.aabb.width / 1300;
-                ssss = _this.armature.armatureData.aabb.height / 1000 < ssss ? ssss : _this.armature.armatureData.aabb.height / 1000;
+                var ssss = _this.armature.armatureData.aabb.width / 1100;
+                ssss = _this.armature.armatureData.aabb.height / 800 < ssss ? ssss : _this.armature.armatureData.aabb.height / 800;
                 _this.container.scaleX = 1 / ssss;
                 _this.container.scaleY = 1 / ssss;
             }
@@ -242,4 +242,3 @@ var Main = (function (_super) {
     return Main;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Main,'Main');
-//# sourceMappingURL=Main.js.map

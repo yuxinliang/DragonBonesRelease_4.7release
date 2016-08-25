@@ -381,6 +381,11 @@ namespace dragonBones {
                 return null;
             }
 
+            if (this._time != this._time) {
+                console.warn("Error time.", this._time);
+                this._time = 0;
+            }
+
             this._isPlaying = true;
 
             if (fadeInTime != fadeInTime || fadeInTime < 0) {
@@ -420,7 +425,7 @@ namespace dragonBones {
                 const slot = slots[i];
                 if (slot.inheritAnimation) {
                     const childArmature = slot.childArmature;
-                    if ( 
+                    if (
                         childArmature &&
                         childArmature.animation.hasAnimation(animationName) &&
                         !childArmature.animation.getState(animationName)

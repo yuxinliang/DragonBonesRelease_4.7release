@@ -32,8 +32,8 @@ namespace dragonBones {
      * @private
      */
     export const enum EventType {
-        Frame = 0,
-        Sound = 1
+        Frame = 10,
+        Sound = 11
     }
     /**
      * @private
@@ -108,11 +108,11 @@ namespace dragonBones {
         /**
          * @private
          */
-        public static DEBUG: boolean = false;
+        public static debug: boolean = false;
         /**
          * @private
          */
-        public static DEBUG_DRAW: boolean = false;
+        public static debugDraw: boolean = false;
         /**
          * @private
          */

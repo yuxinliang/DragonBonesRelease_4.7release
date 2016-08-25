@@ -129,12 +129,12 @@ namespace dragonBones {
                 return;
             }
 
-            const cacheFrameCount = Math.max(Math.floor(this.frameCount * this.scale * value), 1);
-
+            const cacheFrameCount = Math.max(Math.floor((this.frameCount + 1) * this.scale * value), 1);
+            
             this.cacheTimeToFrameScale = cacheFrameCount / (this.duration + 0.000001); //
             this.cachedFrames.length = 0;
             this.cachedFrames.length = cacheFrameCount;
-
+            
             for (let i in this.boneTimelines) {
                 this.boneTimelines[i].cacheFrames(cacheFrameCount);
             }

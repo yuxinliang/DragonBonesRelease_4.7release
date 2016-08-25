@@ -6,7 +6,7 @@ namespace dragonBones {
 
     /**
      * @language zh_CN
-     * 生成骨架的基础工厂。
+     * 生成骨架的基础工厂。 (通常只需要一个全局工厂实例)
      * @see dragonBones.DragonBonesData
      * @see dragonBones.TextureAtlasData
      * @see dragonBones.ArmatureData
@@ -48,7 +48,7 @@ namespace dragonBones {
             let textureAtlasDataList = this._textureAtlasDataMap[dragonBonesName];
             if (textureAtlasDataList) {
                 for (let i = 0, l = textureAtlasDataList.length; i < l; ++i) {
-                    const textureData = textureAtlasDataList[i].getTextureData(textureName);
+                    const textureData = textureAtlasDataList[i].getTexture(textureName);
                     if (textureData) {
                         return textureData;
                     }
@@ -61,7 +61,7 @@ namespace dragonBones {
                     for (let j = 0, lJ = textureAtlasDataList.length; j < lJ; ++j) {
                         const textureAtlasData = textureAtlasDataList[j];
                         if (textureAtlasData.autoSearch) {
-                            const textureData = textureAtlasData.getTextureData(textureName);
+                            const textureData = textureAtlasData.getTexture(textureName);
                             if (textureData) {
                                 return textureData;
                             }
@@ -201,8 +201,8 @@ namespace dragonBones {
                     displayList.length = displayIndex + 1;
                 }
 
-                if (!displayData.texture) {
-                    displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
+                if (!displayData.textureData) {
+                    displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
                 }
 
                 if (displayData.type == DisplayType.Armature) {
@@ -335,7 +335,7 @@ namespace dragonBones {
             if (dragonBonesData) {
                 if (disposeData) {
 
-                    if (DragonBones.DEBUG) {
+                    if (DragonBones.debug) {
                         for (let i = 0, l = DragonBones._armatures.length; i < l; ++i) {
                             const armature = DragonBones._armatures[i];
                             if (armature.armatureData.parent == dragonBonesData) {
@@ -455,12 +455,6 @@ namespace dragonBones {
                 const armature = this._generateArmature(dataPackage);
                 this._buildBones(dataPackage, armature);
                 this._buildSlots(dataPackage, armature);
-
-                if (armature.armatureData.actions.length > 0) { // Add default action.
-                    for (let i = 0, l = armature.armatureData.actions.length; i < l; ++i) {
-                        armature._bufferAction(armature.armatureData.actions[i]);
-                    }
-                }
 
                 armature.advanceTime(0); // Update armature pose.
 

@@ -47,6 +47,14 @@ namespace dragonBones {
         /**
          * @private
          */
+        public _pivotX: number;
+        /**
+         * @private
+         */
+        public _pivotY: number;
+        /**
+         * @private
+         */
         public _displayDataSet: SlotDisplayDataSet;
         /**
          * @private
@@ -168,6 +176,8 @@ namespace dragonBones {
             this._ffdDirty = false;
             this._blendIndex = 0;
             this._zOrder = 0;
+            this._pivotX = 0;
+            this._pivotY = 0;
             this._displayDataSet = null;
             this._meshData = null;
             this._childArmature = null;
@@ -336,9 +346,10 @@ namespace dragonBones {
                         }
 
                         const slotData = this._armature.armatureData.getSlot(this.name);
-                        if (slotData.actions.length > 0) {
-                            for (let i = 0, l = slotData.actions.length; i < l; ++i) {
-                                this._childArmature._bufferAction(slotData.actions[i]);
+                        const actions = slotData.actions.length > 0 ? slotData.actions : this._childArmature.armatureData.actions;
+                        if (actions.length > 0) {
+                            for (let i = 0, l = actions.length; i < l; ++i) {
+                                this._childArmature._bufferAction(actions[i]);
                             }
                         } else {
                             this._childArmature.animation.play();
@@ -505,7 +516,7 @@ namespace dragonBones {
                 if (self.globalTransformMatrix == self._globalTransformMatrix) {
                     self._updateGlobalTransformMatrix();
 
-                    if (cacheFrameIndex >= 0) {
+                    if (cacheFrameIndex >= 0 && !self._cacheFrames[cacheFrameIndex]) {
                         self.globalTransformMatrix = SlotTimelineData.cacheFrame(self._cacheFrames, cacheFrameIndex, self._globalTransformMatrix);
                     }
                 }
@@ -587,7 +598,7 @@ namespace dragonBones {
          * @version DragonBones 4.5
          */
         public invalidUpdate(): void {
-            this._displayDirty = true;
+            this._originDirty = true;
         }
         /**
          * @private
@@ -695,7 +706,9 @@ namespace dragonBones {
                 return;
             }
 
-            (<IArmatureDisplay>value.display).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+            if (value) {
+                (<IArmatureDisplay>value.display).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+            }
 
             this.display = value;
         }

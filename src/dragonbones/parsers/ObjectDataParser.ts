@@ -26,7 +26,7 @@ namespace dragonBones {
                             return true;
                     }
                 } else {
-                    return Boolean(value);
+                    return !!value;
                 }
             }
 
@@ -42,7 +42,7 @@ namespace dragonBones {
                     return defaultValue;
                 }
 
-                return Number(value);
+                return +value || 0;
             }
 
             return defaultValue;
@@ -117,8 +117,9 @@ namespace dragonBones {
 
             if (ObjectDataParser.SLOT in rawData) {
                 const slots = <Array<any>>rawData[ObjectDataParser.SLOT];
+                var zOrder = 0;
                 for (let i = 0, l = slots.length; i < l; ++i) {
-                    armature.addSlot(this._parseSlot(slots[i]));
+                    armature.addSlot(this._parseSlot(slots[i], zOrder++));
                 }
             }
 
@@ -199,12 +200,12 @@ namespace dragonBones {
         /**
          * @private
          */
-        protected _parseSlot(rawData: any): SlotData {
+        protected _parseSlot(rawData: any, zOrder: number): SlotData {
             const slot = BaseObject.borrowObject(SlotData);
             slot.name = ObjectDataParser._getString(rawData, ObjectDataParser.NAME, null);
             slot.parent = this._armature.getBone(ObjectDataParser._getString(rawData, ObjectDataParser.PARENT, null));
             slot.displayIndex = ObjectDataParser._getNumber(rawData, ObjectDataParser.DISPLAY_INDEX, 0);
-            slot.zOrder = ObjectDataParser._getNumber(rawData, ObjectDataParser.Z_ORDER, this._armature.sortedSlots.length); // TODO zOrder.
+            slot.zOrder = ObjectDataParser._getNumber(rawData, ObjectDataParser.Z_ORDER, zOrder); // TODO zOrder.
 
             if (ObjectDataParser.COLOR in rawData) {
                 slot.color = SlotData.generateColor();
@@ -248,9 +249,10 @@ namespace dragonBones {
                 this._skin = skin;
 
                 const slots = <Array<any>>rawData[ObjectDataParser.SLOT];
+                var zOrder = 0;
                 for (let i = 0, l = slots.length; i < l; ++i) {
                     if (this._isOldData) { // Support 2.x ~ 3.x data.
-                        this._armature.addSlot(this._parseSlot(slots[i]));
+                        this._armature.addSlot(this._parseSlot(slots[i], zOrder++));
                     }
 
                     skin.addSlot(this._parseSlotDisplaySet(slots[i]));
@@ -832,7 +834,7 @@ namespace dragonBones {
                         let frame: T = null;
                         let prevFrame: T = null;
 
-                        for (let i = 0, iW = 0, l = this._animation.frameCount + 1; i < l; ++i) { // Fill frame link.
+                        for (let i = 0, iW = 0, l = timeline.frames.length; i < l; ++i) { // Fill frame link.
                             if (frameStart + frameCount <= i && iW < rawFrames.length) {
                                 const frameObject = rawFrames[iW++];
                                 frameStart = i;
@@ -1087,7 +1089,7 @@ namespace dragonBones {
                             textureData.frame.height = frameHeight * scale;
                         }
 
-                        textureAtlasData.addTextureData(textureData);
+                        textureAtlasData.addTexture(textureData);
                     }
                 }
 

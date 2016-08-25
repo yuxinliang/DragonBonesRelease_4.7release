@@ -85,6 +85,7 @@ namespace dragonBones {
             const sampling = new Array<number>((samplingTimes - 1) * 2);
 
             //
+            curve = curve.concat();
             curve.unshift(0, 0);
             curve.push(1, 1);
 

@@ -632,8 +632,8 @@ namespace dragonBones {
         public isRelativePivot: boolean;
         public type: DisplayType;
         public name: string;
-        public texture: TextureData;
-        public armature: ArmatureData;
+        public textureData: TextureData;
+        public armatureData: ArmatureData;
         public mesh: MeshData;
         public pivot: Point = new Point();
         public transform: Transform = new Transform();
@@ -648,8 +648,8 @@ namespace dragonBones {
             this.isRelativePivot = false;
             this.type = DisplayType.Image;
             this.name = null;
-            this.texture = null;
-            this.armature = null;
+            this.textureData = null;
+            this.armatureData = null;
 
             if (this.mesh) {
                 this.mesh.returnToPool();

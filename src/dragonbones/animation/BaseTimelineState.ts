@@ -68,14 +68,14 @@ namespace dragonBones {
 
             if (self._hasAsynchronyTimeline) {
                 const playTimes = self._animationState.playTimes;
-                const totalTimes = playTimes * self._duration;
+                const totalTime = playTimes * self._duration;
 
                 value *= self._timeScale;
                 if (self._timeOffset != 0) {
                     value += self._timeOffset * self._animationDutation;
                 }
 
-                if (playTimes > 0 && (value >= totalTimes || value <= -totalTimes)) {
+                if (playTimes > 0 && (value >= totalTime || value <= -totalTime)) {
                     self._isCompleted = true;
                     currentPlayTimes = playTimes;
 
@@ -278,6 +278,7 @@ namespace dragonBones {
 
         protected _onUpdateFrame(isUpdate: boolean): void {
             const self = this;
+
             if (self._tweenEasing != DragonBones.NO_TWEEN) {
                 self._tweenProgress = (self._currentTime - self._currentFrame.position + self._position) / self._currentFrame.duration;
                 if (self._tweenEasing != 0) {

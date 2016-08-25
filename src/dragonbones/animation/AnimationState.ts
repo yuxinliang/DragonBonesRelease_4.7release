@@ -7,6 +7,11 @@ namespace dragonBones {
      * @version DragonBones 3.0
      */
     export class AnimationState extends BaseObject {
+		/**
+		 * @private
+		 */
+        public static actionEnabled: boolean = true;
+
         /**
          * @private
          */
@@ -27,6 +32,10 @@ namespace dragonBones {
          * @version DragonBones 3.0
          */
         public additiveBlending: boolean;
+		/**
+		 * @private
+		 */
+        public actionEnabled: boolean;
         /**
          * @language zh_CN
          * 需要播放的次数。 [0: 无限循环播放, [1~N]: 循环播放 N 次]
@@ -154,6 +163,7 @@ namespace dragonBones {
         protected _onClear(): void {
             this.displayControl = true;
             this.additiveBlending = false;
+            this.actionEnabled = false;
             this.playTimes = 1;
             this.timeScale = 1;
             this.weight = 1;
@@ -311,6 +321,8 @@ namespace dragonBones {
             this._timeline.fadeIn(this._armature, this, this._animationData, this._time);
 
             this._updateTimelineStates();
+
+            this.actionEnabled = AnimationState.actionEnabled;
         }
         /**
          * @private
@@ -463,7 +475,8 @@ namespace dragonBones {
                 const cacheTimeToFrameScale = self._animationData.cacheTimeToFrameScale;
                 let isUpdatesTimeline = true;
                 let isUpdatesBoneTimeline = true;
-                let time = isCacheEnabled ? (Math.floor(self._time * cacheTimeToFrameScale) / cacheTimeToFrameScale) : self._time; // Cache time internval.
+                let time = cacheTimeToFrameScale * 2;
+                time = isCacheEnabled ? (Math.floor(self._time * time) / time) : self._time; // Cache time internval.
 
                 // Update main timeline.                
                 self._timeline.update(time);

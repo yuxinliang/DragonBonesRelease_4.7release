@@ -3,9 +3,9 @@ namespace dragonBones {
      * @private
      */
     export type EventStringType =
-        string | 'start' | 'loopComplete' | 'complete' |
-        'fadeIn' | 'fadeInComplete' | 'fadeOut' | 'fadeOutComplete' |
-        'frameEvent' | 'soundEvent';
+        string | "start" | "loopComplete" | "complete" |
+        "fadeIn" | "fadeInComplete" | "fadeOut" | "fadeOutComplete" |
+        "frameEvent" | "soundEvent";
     /**
      * @language zh_CN
      * 事件接口。

@@ -343,7 +343,7 @@ namespace dragonBones {
                     }
                 }
 
-                if (DragonBones.DEBUG_DRAW) {
+                if (DragonBones.debugDraw) {
                     self._display._debugDraw();
                 }
 

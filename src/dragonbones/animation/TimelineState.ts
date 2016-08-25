@@ -24,9 +24,11 @@ namespace dragonBones {
         protected _onCrossFrame(frame: AnimationFrameData): void {
             const self = this;
 
-            const actions = frame.actions;
-            for (let i = 0, l = actions.length; i < l; ++i) {
-                self._armature._bufferAction(actions[i]);
+            if (this._animationState.actionEnabled) {
+                const actions = frame.actions;
+                for (let i = 0, l = actions.length; i < l; ++i) {
+                    self._armature._bufferAction(actions[i]);
+                }
             }
 
             const eventDispatcher = self._armature._display;

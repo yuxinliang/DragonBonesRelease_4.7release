@@ -68,7 +68,7 @@ namespace dragonBones {
         /**
          * @private
          */
-        public addTextureData(value: TextureData): void {
+        public addTexture(value: TextureData): void {
             if (value && value.name && !this.textures[value.name]) {
                 this.textures[value.name] = value;
                 value.parent = this;
@@ -79,7 +79,7 @@ namespace dragonBones {
         /**
          * @private
          */
-        public getTextureData(name: string): TextureData {
+        public getTexture(name: string): TextureData {
             return this.textures[name];
         }
     }
