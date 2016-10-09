@@ -157,3 +157,4 @@ var dragonBones;
     dragonBones.AnimationData = AnimationData;
     egret.registerClass(AnimationData,'dragonBones.AnimationData');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=AnimationData.js.map

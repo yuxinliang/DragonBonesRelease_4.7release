@@ -149,3 +149,4 @@ var dragonBones;
     dragonBones.WorldClock = WorldClock;
     egret.registerClass(WorldClock,'dragonBones.WorldClock',["dragonBones.IAnimateble"]);
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=WorldClock.js.map

@@ -380,3 +380,4 @@ var dragonBones;
     dragonBones.DataParser = DataParser;
     egret.registerClass(DataParser,'dragonBones.DataParser');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=DataParser.js.map

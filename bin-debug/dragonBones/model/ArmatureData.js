@@ -601,3 +601,4 @@ var dragonBones;
     dragonBones.MeshData = MeshData;
     egret.registerClass(MeshData,'dragonBones.MeshData');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=ArmatureData.js.map

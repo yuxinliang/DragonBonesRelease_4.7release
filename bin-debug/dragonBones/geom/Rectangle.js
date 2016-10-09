@@ -30,3 +30,4 @@ var dragonBones;
     dragonBones.Rectangle = Rectangle;
     egret.registerClass(Rectangle,'dragonBones.Rectangle');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=Rectangle.js.map

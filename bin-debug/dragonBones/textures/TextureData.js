@@ -87,3 +87,4 @@ var dragonBones;
     dragonBones.TextureData = TextureData;
     egret.registerClass(TextureData,'dragonBones.TextureData');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=TextureData.js.map

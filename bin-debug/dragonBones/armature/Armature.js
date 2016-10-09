@@ -647,3 +647,4 @@ var dragonBones;
     dragonBones.Armature = Armature;
     egret.registerClass(Armature,'dragonBones.Armature',["dragonBones.IAnimateble"]);
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=Armature.js.map

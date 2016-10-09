@@ -541,3 +541,4 @@ var dragonBones;
     dragonBones.Slot = Slot;
     egret.registerClass(Slot,'dragonBones.Slot');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=Slot.js.map

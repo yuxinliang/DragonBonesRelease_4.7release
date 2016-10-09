@@ -243,3 +243,4 @@ var dragonBones;
     dragonBones.ExtensionFrameData = ExtensionFrameData;
     egret.registerClass(ExtensionFrameData,'dragonBones.ExtensionFrameData');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=FrameData.js.map

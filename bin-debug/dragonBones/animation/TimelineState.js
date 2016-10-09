@@ -586,3 +586,4 @@ var dragonBones;
     dragonBones.FFDTimelineState = FFDTimelineState;
     egret.registerClass(FFDTimelineState,'dragonBones.FFDTimelineState');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=TimelineState.js.map

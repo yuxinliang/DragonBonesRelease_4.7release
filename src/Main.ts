@@ -74,16 +74,41 @@ class Main extends egret.DisplayObjectContainer {
                 this.isCtrlDown = true;
             }
             if (evt.keyCode == 49) {
-                this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]+50//-this.armature.getBones()[0].global.x;
-                this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]+50//+this.armature.getBones()[0].global.y;
-                var ssss = this.armature.armatureData.aabb.width / 1100;
-                ssss = this.armature.armatureData.aabb.height / 800 < ssss ? ssss : this.armature.armatureData.aabb.height / 800;
-                this.container.scaleX = 1 / ssss;
-                this.container.scaleY = 1 / ssss;
-                //this["armatureDisplay"].x = this["armature"].getBones()[0].global.x;
-                //this["armatureDisplay"].y = this["armature"].getBones()[0].global.y;
-                //this["armatureDisplay"].scaleX = 1;
-                //this["armatureDisplay"].scaleY = 1;
+                if (this.hasStage) {
+                    this.container.x = 0;
+                    this.container.y = 0;
+                    this.container.scaleX = 1;
+                    this.container.scaleY = 1;
+                    this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
+                    this.armatureDisplay.y = this.armature.getBones()[0].global.y;
+                } else {
+                    this.hasStage = false;
+                    if (this.armature.armatureData.aabb["width"] == 0 && this.armature.armatureData.aabb["height"] == 0 && this.armature.armatureData.aabb["x"] == 0 && this.armature.armatureData.aabb["y"] == 0) {
+                        this.armatureDisplay.x = this.armature.getBones()[0].global.x + 600;//_boneList[0].global.x;
+                        this.armatureDisplay.y = this.armature.getBones()[0].global.y + 450;
+                    } else {
+                        var ssss = this.armature.armatureData.aabb.width / 1100;
+                        if (this.armature.armatureData.aabb.height / 800 > ssss) {
+                            ssss = this.armature.armatureData.aabb.height / 800;
+                        }
+                        if (ssss > 3) {
+                            ssss = 3;
+                        }
+                        if (ssss < 0.3) {
+                            ssss = 0.3
+                        }
+                        var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2
+                        var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2
+
+                        //需换算出root点应该在的位置。
+                        this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50;
+                        this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50;
+                        this.armatureDisplay.scaleX = 1 / ssss;
+                        this.armatureDisplay.scaleY = 1 / ssss;
+                    }
+                }
+                this.tempDisX = 0;
+                this.tempDisY = 0;
             }
         });
         document.addEventListener("keyup", (evt: KeyboardEvent) => {
@@ -99,6 +124,8 @@ class Main extends egret.DisplayObjectContainer {
     private armature: dragonBones.Armature;
     /**骨骼的可视对象**/
     private armatureDisplay;
+    private armaInintX = 0;
+    private armaInintY = 0;
     /**创建骨骼模型**/
     private createMotorcycleExp(): void {
         this.container = new egret.DisplayObjectContainer();
@@ -129,23 +156,47 @@ class Main extends egret.DisplayObjectContainer {
 
         this.armature = factory.buildArmature(skeletonData.armature[0].name);
         //this.armature = factory.buildFastArmature(skeletonData.armature[0].name);
-        if (skeletonData.armature[0].type == "Stage") {
-            this.container.x = 0;
-            this.container.y = 0;
-        }
+
         this.armatureDisplay = this.armature.display;
         dragonBones.WorldClock.clock.add(this.armature);
         this.container.addChild(this.armatureDisplay);
-        //this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
-        //this.armatureDisplay.y = this.armature.getBones()[0].global.y;
-        //this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]-this.armature.getBones()[0].global.x;
-        // this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]-this.armature.getBones()[0].global.y;
-        this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]+50//-this.armature.getBones()[0].global.x;
-        this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]+50//+this.armature.getBones()[0].global.y;
-        var ssss = this.armature.armatureData.aabb.width / 1100;
-        ssss = this.armature.armatureData.aabb.height / 800 < ssss ? ssss : this.armature.armatureData.aabb.height / 800;
-        this.container.scaleX = 1 / ssss;
-        this.container.scaleY = 1 / ssss;
+
+        if (skeletonData.armature[0].type == "Stage") {
+            this.hasStage = true;
+            this.container.x = 0;
+            this.container.y = 0;
+            this.container.scaleX = 1;
+            this.container.scaleY = 1;
+            this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
+            this.armatureDisplay.y = this.armature.getBones()[0].global.y;
+        } else {
+            this.hasStage = false;
+            if (this.armature.armatureData.aabb["width"] == 0 && this.armature.armatureData.aabb["height"] == 0 && this.armature.armatureData.aabb["x"] == 0 && this.armature.armatureData.aabb["y"] == 0) {
+                this.armatureDisplay.x = this.armature.getBones()[0].global.x + 600;//_boneList[0].global.x;
+                this.armatureDisplay.y = this.armature.getBones()[0].global.y + 450;
+            } else {
+                var ssss = this.armature.armatureData.aabb.width / 1100;
+                if (this.armature.armatureData.aabb.height / 800 > ssss) {
+                    ssss = this.armature.armatureData.aabb.height / 800;
+                }
+                if (ssss > 3) {
+                    ssss = 3;
+                }
+                if (ssss < 0.3) {
+                    ssss = 0.3
+                }
+                var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2
+                var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2
+
+                //需换算出root点应该在的位置。
+                this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50;
+                this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50;
+                this.armatureDisplay.scaleX = 1 / ssss;
+                this.armatureDisplay.scaleY = 1 / ssss;
+            }
+        }
+        this.armaInintX = this.armatureDisplay.x;
+        this.armaInintY = this.armatureDisplay.y;
         //var aniCachManager:dragonBones.AnimationCacheManager = this.armature.enableAnimationCache(60, null, false);
         //console.log(aniCachManager)
         //aniCachManager.resetCacheGeneratorArmature();
@@ -156,6 +207,7 @@ class Main extends egret.DisplayObjectContainer {
             dragonBones.WorldClock.clock.advanceTime(advancedTime / 1000);
         }, this);
     }
+    private hasStage: boolean = false;
     private curAnimIndex: number = 0;
     private curAnimationName: string;
     private onTouch(evt: egret.TouchEvent): void {
@@ -182,7 +234,8 @@ class Main extends egret.DisplayObjectContainer {
             this.tempY = evt.stageY;
             this.armeX = this.armatureDisplay.x;
             this.armeY = this.armatureDisplay.y;
-            this.armeSX = this.container.scaleX;
+            //-- this.armeSX = this.container.scaleX;
+            this.armeSX = this.armatureDisplay.scaleX;
             this.nowX = evt.stageX;
             this.nowY = evt.stageY;
         } else {
@@ -200,6 +253,9 @@ class Main extends egret.DisplayObjectContainer {
     private nowY;
     private now2X;
     private now2Y;
+    private tempDisX = 0;
+    private tempDisY = 0;
+
     private onTouchMove(evt: egret.TouchEvent): void {
         this.isMove = true;
         if (evt.touchPointID == this.firstPoint) {
@@ -214,29 +270,66 @@ class Main extends egret.DisplayObjectContainer {
         if (this.isMultiFinger) {
             var nowDistance = Math.sqrt((this.now2X - this.nowX) * (this.now2X - this.nowX) + (this.now2Y - this.nowY) * (this.now2Y - this.nowY));
             var temDistance = Math.sqrt((this.temp2X - this.tempX) * (this.temp2X - this.tempX) + (this.temp2Y - this.tempY) * (this.temp2Y - this.tempY));
-            if (this.container.scaleX > 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) > 0.3 && this.container.scaleX < 3 && this.armeSX + ((nowDistance / temDistance) - 1) < 3) {
-                this.container.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
-                this.container.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
+            var addSC = ((nowDistance / temDistance) - 1);
+            if (addSC > 0) {
+                if (this.armatureDisplay.scaleX <= 3 && this.armeSX + addSC <= 3) {
+                    this.armatureDisplay.scaleX = this.armeSX + addSC;
+                    this.armatureDisplay.scaleY = this.armeSX + addSC;
+                }
+            } else {
+                if (this.armatureDisplay.scaleX >= 0.3 && this.armeSX + addSC >= 0.3) {
+                    this.armatureDisplay.scaleX = this.armeSX + addSC;
+                    this.armatureDisplay.scaleY = this.armeSX + addSC;
+                }
             }
+            /*--if (this.armatureDisplay.scaleX >= 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) >= 0.3 && this.armatureDisplay.scaleX <= 3 && this.armeSX + ((nowDistance / temDistance) - 1) <= 3) {
+                this.armatureDisplay.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
+                this.armatureDisplay.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
+            }*/
+            var ssss = 1 / this.armatureDisplay.scaleX;
+            var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2
+            var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2
+
+            //需换算出root点应该在的位置。
+            this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50 + this.tempDisX;
+            this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50 + this.tempDisY;
         } else {
             var value = evt.stageY - this.tempY;
             if (!this.isCtrlDown) {
-                this.armatureDisplay.x = this.armeX + ((evt.stageX - this.tempX)/this.container.scaleX);
-                this.armatureDisplay.y = this.armeY + ((evt.stageY - this.tempY)/this.container.scaleX);
+                this.armatureDisplay.x = this.armeX + (evt.stageX - this.tempX) //+ (this.tempDisX)// this.armatureDisplay.scaleX);
+                this.armatureDisplay.y = this.armeY + (evt.stageY - this.tempY) //+ (this.tempDisX)// this.armatureDisplay.scaleX); 
+
+                this.tempDisX = this.armatureDisplay.x - this.armaInintX;
+                this.tempDisY = this.armatureDisplay.y - this.armaInintY;
+
             } else {
                 if (this.tempY < evt.stageY) {
-                    if (this.container.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
-                        this.container.scaleX = this.armeSX - (value / 200);
-                        this.container.scaleY = this.armeSX - (value / 200);
+                    if (this.armatureDisplay.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
+                        this.armatureDisplay.scaleX = this.armeSX - (value / 200);
+                        this.armatureDisplay.scaleY = this.armeSX - (value / 200);
+                    }else{
+                        this.armatureDisplay.scaleX = 0.3;
+                        this.armatureDisplay.scaleY = 0.3;
                     }
                 } else {
-                    if (this.container.scaleX < 3 && this.armeSX - (3 * value / 200) < 3) {
-                        this.container.scaleX = this.armeSX - (3 * value / 200);
-                        this.container.scaleY = this.armeSX - (3 * value / 200);
+                    if (this.armatureDisplay.scaleX < 3 && this.armeSX - (value / 200) < 3) {
+                        this.armatureDisplay.scaleX = this.armeSX - (value / 200);
+                        this.armatureDisplay.scaleY = this.armeSX - (value / 200);
+                    }else{
+                        this.armatureDisplay.scaleX = 3;
+                        this.armatureDisplay.scaleY = 3;
                     }
                 }
+                var ssss = 1 / this.armatureDisplay.scaleX;
+                var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2
+                var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2
+
+                //需换算出root点应该在的位置。
+                this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50 + (this.tempDisX);
+                this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50 + (this.tempDisY);
             }
         }
+
     }
     private onTouchEnd(evt: egret.TouchEvent): void {
         if (this.firstPoint == evt.touchPointID) {
@@ -257,7 +350,6 @@ class Main extends egret.DisplayObjectContainer {
                 this.armature.animation.gotoAndPlay(this.curAnimationName, -1, -1);
             }
         }
-
     }
 }
 

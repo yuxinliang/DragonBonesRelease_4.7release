@@ -274,3 +274,4 @@ var dragonBones;
     dragonBones.TweenTimelineState = TweenTimelineState;
     egret.registerClass(TweenTimelineState,'dragonBones.TweenTimelineState');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=BaseTimelineState.js.map

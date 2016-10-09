@@ -223,3 +223,4 @@ var dragonBones;
     dragonBones.EgretFactory = EgretFactory;
     egret.registerClass(EgretFactory,'dragonBones.EgretFactory');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=EgretFactory.js.map

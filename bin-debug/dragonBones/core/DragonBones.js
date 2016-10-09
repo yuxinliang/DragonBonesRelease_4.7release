@@ -81,3 +81,4 @@ var dragonBones;
     dragonBones.DragonBones = DragonBones;
     egret.registerClass(DragonBones,'dragonBones.DragonBones');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=DragonBones.js.map

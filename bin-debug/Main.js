@@ -2,6 +2,9 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         _super.call(this);
+        this.armaInintX = 0;
+        this.armaInintY = 0;
+        this.hasStage = false;
         this.curAnimIndex = 0;
         this.tempX = 0;
         this.tempY = 0;
@@ -15,6 +18,8 @@ var Main = (function (_super) {
         this.temp2X = 0;
         this.temp2Y = 0;
         this.isMultiFinger = false;
+        this.tempDisX = 0;
+        this.tempDisY = 0;
         this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
     }
     var d = __define,c=Main,p=c.prototype;
@@ -84,12 +89,42 @@ var Main = (function (_super) {
                 _this.isCtrlDown = true;
             }
             if (evt.keyCode == 49) {
-                _this.armatureDisplay.x = -_this.armature.armatureData.aabb["x"] + 50; //-this.armature.getBones()[0].global.x;
-                _this.armatureDisplay.y = -_this.armature.armatureData.aabb["y"] + 50; //+this.armature.getBones()[0].global.y;
-                var ssss = _this.armature.armatureData.aabb.width / 1100;
-                ssss = _this.armature.armatureData.aabb.height / 800 < ssss ? ssss : _this.armature.armatureData.aabb.height / 800;
-                _this.container.scaleX = 1 / ssss;
-                _this.container.scaleY = 1 / ssss;
+                if (_this.hasStage) {
+                    _this.container.x = 0;
+                    _this.container.y = 0;
+                    _this.container.scaleX = 1;
+                    _this.container.scaleY = 1;
+                    _this.armatureDisplay.x = _this.armature.getBones()[0].global.x; //_boneList[0].global.x;
+                    _this.armatureDisplay.y = _this.armature.getBones()[0].global.y;
+                }
+                else {
+                    _this.hasStage = false;
+                    if (_this.armature.armatureData.aabb["width"] == 0 && _this.armature.armatureData.aabb["height"] == 0 && _this.armature.armatureData.aabb["x"] == 0 && _this.armature.armatureData.aabb["y"] == 0) {
+                        _this.armatureDisplay.x = _this.armature.getBones()[0].global.x + 600; //_boneList[0].global.x;
+                        _this.armatureDisplay.y = _this.armature.getBones()[0].global.y + 450;
+                    }
+                    else {
+                        var ssss = _this.armature.armatureData.aabb.width / 1100;
+                        if (_this.armature.armatureData.aabb.height / 800 > ssss) {
+                            ssss = _this.armature.armatureData.aabb.height / 800;
+                        }
+                        if (ssss > 3) {
+                            ssss = 3;
+                        }
+                        if (ssss < 0.3) {
+                            ssss = 0.3;
+                        }
+                        var centerX = (1100 - (_this.armature.armatureData.aabb["width"] / ssss)) / 2;
+                        var centerY = (800 - (_this.armature.armatureData.aabb["height"] / ssss)) / 2;
+                        //需换算出root点应该在的位置。
+                        _this.armatureDisplay.x = (-_this.armature.armatureData.aabb["x"]) / ssss + centerX + 50;
+                        _this.armatureDisplay.y = (-_this.armature.armatureData.aabb["y"]) / ssss + centerY + 50;
+                        _this.armatureDisplay.scaleX = 1 / ssss;
+                        _this.armatureDisplay.scaleY = 1 / ssss;
+                    }
+                }
+                _this.tempDisX = 0;
+                _this.tempDisY = 0;
             }
         });
         document.addEventListener("keyup", function (evt) {
@@ -125,23 +160,46 @@ var Main = (function (_super) {
         }
         this.armature = factory.buildArmature(skeletonData.armature[0].name);
         //this.armature = factory.buildFastArmature(skeletonData.armature[0].name);
-        if (skeletonData.armature[0].type == "Stage") {
-            this.container.x = 0;
-            this.container.y = 0;
-        }
         this.armatureDisplay = this.armature.display;
         dragonBones.WorldClock.clock.add(this.armature);
         this.container.addChild(this.armatureDisplay);
-        //this.armatureDisplay.x = this.armature.getBones()[0].global.x;//_boneList[0].global.x;
-        //this.armatureDisplay.y = this.armature.getBones()[0].global.y;
-        //this.armatureDisplay.x = -this.armature.armatureData.aabb["x"]-this.armature.getBones()[0].global.x;
-        // this.armatureDisplay.y = -this.armature.armatureData.aabb["y"]-this.armature.getBones()[0].global.y;
-        this.armatureDisplay.x = -this.armature.armatureData.aabb["x"] + 50; //-this.armature.getBones()[0].global.x;
-        this.armatureDisplay.y = -this.armature.armatureData.aabb["y"] + 50; //+this.armature.getBones()[0].global.y;
-        var ssss = this.armature.armatureData.aabb.width / 1100;
-        ssss = this.armature.armatureData.aabb.height / 800 < ssss ? ssss : this.armature.armatureData.aabb.height / 800;
-        this.container.scaleX = 1 / ssss;
-        this.container.scaleY = 1 / ssss;
+        if (skeletonData.armature[0].type == "Stage") {
+            this.hasStage = true;
+            this.container.x = 0;
+            this.container.y = 0;
+            this.container.scaleX = 1;
+            this.container.scaleY = 1;
+            this.armatureDisplay.x = this.armature.getBones()[0].global.x; //_boneList[0].global.x;
+            this.armatureDisplay.y = this.armature.getBones()[0].global.y;
+        }
+        else {
+            this.hasStage = false;
+            if (this.armature.armatureData.aabb["width"] == 0 && this.armature.armatureData.aabb["height"] == 0 && this.armature.armatureData.aabb["x"] == 0 && this.armature.armatureData.aabb["y"] == 0) {
+                this.armatureDisplay.x = this.armature.getBones()[0].global.x + 600; //_boneList[0].global.x;
+                this.armatureDisplay.y = this.armature.getBones()[0].global.y + 450;
+            }
+            else {
+                var ssss = this.armature.armatureData.aabb.width / 1100;
+                if (this.armature.armatureData.aabb.height / 800 > ssss) {
+                    ssss = this.armature.armatureData.aabb.height / 800;
+                }
+                if (ssss > 3) {
+                    ssss = 3;
+                }
+                if (ssss < 0.3) {
+                    ssss = 0.3;
+                }
+                var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2;
+                var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2;
+                //需换算出root点应该在的位置。
+                this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50;
+                this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50;
+                this.armatureDisplay.scaleX = 1 / ssss;
+                this.armatureDisplay.scaleY = 1 / ssss;
+            }
+        }
+        this.armaInintX = this.armatureDisplay.x;
+        this.armaInintY = this.armatureDisplay.y;
         //var aniCachManager:dragonBones.AnimationCacheManager = this.armature.enableAnimationCache(60, null, false);
         //console.log(aniCachManager)
         //aniCachManager.resetCacheGeneratorArmature();
@@ -163,7 +221,8 @@ var Main = (function (_super) {
             this.tempY = evt.stageY;
             this.armeX = this.armatureDisplay.x;
             this.armeY = this.armatureDisplay.y;
-            this.armeSX = this.container.scaleX;
+            //-- this.armeSX = this.container.scaleX;
+            this.armeSX = this.armatureDisplay.scaleX;
             this.nowX = evt.stageX;
             this.nowY = evt.stageY;
         }
@@ -178,6 +237,7 @@ var Main = (function (_super) {
             }
         }
     };
+    //private finishDisFlag = false;
     p.onTouchMove = function (evt) {
         this.isMove = true;
         if (evt.touchPointID == this.firstPoint) {
@@ -191,30 +251,67 @@ var Main = (function (_super) {
         if (this.isMultiFinger) {
             var nowDistance = Math.sqrt((this.now2X - this.nowX) * (this.now2X - this.nowX) + (this.now2Y - this.nowY) * (this.now2Y - this.nowY));
             var temDistance = Math.sqrt((this.temp2X - this.tempX) * (this.temp2X - this.tempX) + (this.temp2Y - this.tempY) * (this.temp2Y - this.tempY));
-            if (this.container.scaleX > 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) > 0.3 && this.container.scaleX < 3 && this.armeSX + ((nowDistance / temDistance) - 1) < 3) {
-                this.container.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
-                this.container.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
+            var addSC = ((nowDistance / temDistance) - 1);
+            if (addSC > 0) {
+                if (this.armatureDisplay.scaleX <= 3 && this.armeSX + addSC <= 3) {
+                    this.armatureDisplay.scaleX = this.armeSX + addSC;
+                    this.armatureDisplay.scaleY = this.armeSX + addSC;
+                }
             }
+            else {
+                if (this.armatureDisplay.scaleX >= 0.3 && this.armeSX + addSC >= 0.3) {
+                    this.armatureDisplay.scaleX = this.armeSX + addSC;
+                    this.armatureDisplay.scaleY = this.armeSX + addSC;
+                }
+            }
+            /*--if (this.armatureDisplay.scaleX >= 0.3 && this.armeSX + ((nowDistance / temDistance) - 1) >= 0.3 && this.armatureDisplay.scaleX <= 3 && this.armeSX + ((nowDistance / temDistance) - 1) <= 3) {
+                this.armatureDisplay.scaleX = this.armeSX + ((nowDistance / temDistance) - 1);
+                this.armatureDisplay.scaleY = this.armeSX + ((nowDistance / temDistance) - 1);
+            }*/
+            var ssss = 1 / this.armatureDisplay.scaleX;
+            var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2;
+            var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2;
+            //需换算出root点应该在的位置。
+            this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50 + this.tempDisX;
+            this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50 + this.tempDisY;
         }
         else {
             var value = evt.stageY - this.tempY;
             if (!this.isCtrlDown) {
-                this.armatureDisplay.x = this.armeX + ((evt.stageX - this.tempX) / this.container.scaleX);
-                this.armatureDisplay.y = this.armeY + ((evt.stageY - this.tempY) / this.container.scaleX);
+                this.armatureDisplay.x = this.armeX + (evt.stageX - this.tempX); //+ (this.tempDisX)// this.armatureDisplay.scaleX);
+                this.armatureDisplay.y = this.armeY + (evt.stageY - this.tempY); //+ (this.tempDisX)// this.armatureDisplay.scaleX); 
+                // this.finishDisFlag = true;
+                // this.finishDisFlag = false;
+                this.tempDisX = this.armatureDisplay.x - this.armaInintX;
+                this.tempDisY = this.armatureDisplay.y - this.armaInintY;
             }
             else {
                 if (this.tempY < evt.stageY) {
-                    if (this.container.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
-                        this.container.scaleX = this.armeSX - (value / 200);
-                        this.container.scaleY = this.armeSX - (value / 200);
+                    if (this.armatureDisplay.scaleX > 0.3 && this.armeSX - (value / 200) > 0.3) {
+                        this.armatureDisplay.scaleX = this.armeSX - (value / 200);
+                        this.armatureDisplay.scaleY = this.armeSX - (value / 200);
+                    }
+                    else {
+                        this.armatureDisplay.scaleX = 0.3;
+                        this.armatureDisplay.scaleY = 0.3;
                     }
                 }
                 else {
-                    if (this.container.scaleX < 3 && this.armeSX - (3 * value / 200) < 3) {
-                        this.container.scaleX = this.armeSX - (3 * value / 200);
-                        this.container.scaleY = this.armeSX - (3 * value / 200);
+                    if (this.armatureDisplay.scaleX < 3 && this.armeSX - (value / 200) < 3) {
+                        this.armatureDisplay.scaleX = this.armeSX - (value / 200);
+                        this.armatureDisplay.scaleY = this.armeSX - (value / 200);
+                    }
+                    else {
+                        this.armatureDisplay.scaleX = 3;
+                        this.armatureDisplay.scaleY = 3;
                     }
                 }
+                var ssss = 1 / this.armatureDisplay.scaleX;
+                var centerX = (1100 - (this.armature.armatureData.aabb["width"] / ssss)) / 2;
+                var centerY = (800 - (this.armature.armatureData.aabb["height"] / ssss)) / 2;
+                //需换算出root点应该在的位置。
+                this.armatureDisplay.x = (-this.armature.armatureData.aabb["x"]) / ssss + centerX + 50 + (this.tempDisX);
+                this.armatureDisplay.y = (-this.armature.armatureData.aabb["y"]) / ssss + centerY + 50 + (this.tempDisY);
             }
         }
     };
@@ -242,3 +339,4 @@ var Main = (function (_super) {
     return Main;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Main,'Main');
+//# sourceMappingURL=Main.js.map

@@ -131,3 +131,4 @@ var dragonBones;
     dragonBones.Matrix = Matrix;
     egret.registerClass(Matrix,'dragonBones.Matrix');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=Matrix.js.map

@@ -105,3 +105,4 @@ var dragonBones;
     dragonBones.EventObject = EventObject;
     egret.registerClass(EventObject,'dragonBones.EventObject');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=EventObject.js.map

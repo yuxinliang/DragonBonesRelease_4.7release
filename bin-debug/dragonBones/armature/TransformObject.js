@@ -92,3 +92,4 @@ var dragonBones;
     dragonBones.TransformObject = TransformObject;
     egret.registerClass(TransformObject,'dragonBones.TransformObject');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=TransformObject.js.map

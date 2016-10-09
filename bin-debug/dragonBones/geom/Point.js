@@ -23,3 +23,4 @@ var dragonBones;
     dragonBones.Point = Point;
     egret.registerClass(Point,'dragonBones.Point');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=Point.js.map

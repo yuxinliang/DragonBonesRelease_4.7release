@@ -140,3 +140,4 @@ var dragonBones;
     dragonBones.FFDTimelineData = FFDTimelineData;
     egret.registerClass(FFDTimelineData,'dragonBones.FFDTimelineData');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=TimelineData.js.map

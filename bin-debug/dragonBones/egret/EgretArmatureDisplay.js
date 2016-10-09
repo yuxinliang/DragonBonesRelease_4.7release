@@ -385,3 +385,4 @@ var dragonBones;
     dragonBones.AnimationCacheManager = AnimationCacheManager;
     egret.registerClass(AnimationCacheManager,'dragonBones.AnimationCacheManager');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=EgretArmatureDisplay.js.map

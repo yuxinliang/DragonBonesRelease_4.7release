@@ -42,3 +42,4 @@ var dragonBones;
     dragonBones.ColorTransform = ColorTransform;
     egret.registerClass(ColorTransform,'dragonBones.ColorTransform');
 })(dragonBones || (dragonBones = {}));
+//# sourceMappingURL=ColorTransform.js.map
